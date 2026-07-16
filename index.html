@@ -380,7 +380,9 @@ Please select at least one filter to display data.
 <div class="tableWrap">
 <table id="mainTable">
 <thead>
-<tr><th>#</th><th>Trainer</th><th>Students</th><th>Student Count</th><th>Activity Names</th><th>Start Date</th><th>Total</th><th>Activities</th><th>Percentage</th><th>Rating</th>
+<tr><th>#</th><th>Trainer</th>
+<th>Student Count</th>
+<th>Activity Names</th><th>Start Date</th><th>Total</th><th>Activities</th><th>Percentage</th><th>Rating</th>
 </tr>
 </thead>
 <tbody id="rows">
@@ -1704,7 +1706,23 @@ const r = rate(d.total);
 ratingCount[r.label]++;
 const pct = total ? ((d.total/total)*100).toFixed(1)+"%" : "0%";
 rows.innerHTML+=`
-<tr><td>${i++}</td><td>${t}</td><td>${[...d.students].join("<br>") || "-"}</td><td>${d.students.size}</td><td>${[...d.skills].join("<br>")}</td><td>${d.start||"-"}</td><td>${d.total}</td><td>${d.skills.size}</td><td>${pct}</td><td><span class="badge ${r.cls}">${r.label[0]}</span><span class="badge-label">${r.label}</span></td>
+<tr>
+<td>${i++}</td>
+<td>${t}</td>
+<td>${d.students.size}</td>
+<td>${[...d.skills].join("<br>")}</td>
+<td>${d.start||"-"}</td>
+<td>${d.total}</td>
+<td>${d.skills.size}</td>
+<td>${pct}</td>
+<td>
+<span class="badge ${r.cls}">
+${r.label[0]}
+</span>
+<span class="badge-label">
+${r.label}
+</span>
+</td>
 </tr>
 `;
 });
