@@ -129,6 +129,24 @@ font-weight:900; font-size:11px; color:#fff;
 .badge.vg{ background:#3498db; }
 .badge.gd{ background:#f1c40f; color:#2b2b2b; }
 .badge-label{ margin-left:8px; font-weight:900; font-size:12px; }
+
+/* تلوين حقل التقييم بالكامل */
+.rating-cell{
+font-weight:900 !important;
+font-size:13px !important;
+}
+.rating-cell.ex{
+background:#2ecc71 !important;
+color:#fff !important;
+}
+.rating-cell.vg{
+background:#3498db !important;
+color:#fff !important;
+}
+.rating-cell.gd{
+background:#f1c40f !important;
+color:#2b2b2b !important;
+}
 .activity-form-card,
 .student-summary-card{
 margin-bottom:16px;
@@ -1715,13 +1733,8 @@ rows.innerHTML+=`
 <td>${d.total}</td>
 <td>${d.skills.size}</td>
 <td>${pct}</td>
-<td>
-<span class="badge ${r.cls}">
-${r.label[0]}
-</span>
-<span class="badge-label">
+<td class="rating-cell ${r.cls}">
 ${r.label}
-</span>
 </td>
 </tr>
 `;
@@ -1772,7 +1785,7 @@ let best = [];
 rowsEls.forEach(tr=>{
 const tds = tr.querySelectorAll("td");
 const trainer = tds[1].innerText.trim();
-const pctText = tds[8].innerText.replace("%","").trim();
+const pctText = tds[7].innerText.replace("%","").trim();
 const pct = parseFloat(pctText) || 0;
 if(pct > maxPct){
 maxPct = pct;
@@ -2069,7 +2082,7 @@ function exportPDF(){
         tr.querySelectorAll("td");
 
       adminBody.push(
-        [0,1,2,3,4,5,6,7,8,9]
+        [0,1,2,3,4,5,6,7,8]
           .map(index =>
             cleanTextForPDF(
               tds[index]?.innerText || ""
@@ -2086,7 +2099,6 @@ function exportPDF(){
       head:[[
         "#",
         "Trainer",
-        "Students",
         "Student Count",
         "Activity Names",
         "Start Date",
@@ -2125,7 +2137,7 @@ function exportPDF(){
 
         if(
           data.section === "body" &&
-          data.column.index === 9
+          data.column.index === 8
         ){
 
           const value =
