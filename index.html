@@ -1086,11 +1086,9 @@ fillFilters();
 renderSavedActivities();
 renderStudentParticipation();
 renderCourseCompetition();
-if(hasAnyFilter()){
+
+/* عرض جميع البيانات افتراضيًا، والفلاتر اختيارية */
 applyFilter();
-}else{
-hideContent();
-}
 }
 function resetFilters(){
 trainerFilter.innerHTML =
@@ -1640,10 +1638,8 @@ handleLinkedFilterChange
 );
 });
 function applyFilter(){
-if(!hasAnyFilter()){
-hideContent();
-return;
-}
+
+/* جميع الفلاتر اختيارية */
 showContent();
 rows.innerHTML="";
 if(barChart) barChart.destroy();
@@ -1837,23 +1833,13 @@ function exportPDF(){
 
   try{
 
-    if(!hasAnyFilter()){
-      alert("Please select at least one filter first.");
-      return;
-    }
-
+    /* يمكن تصدير التقرير بدون اختيار المدرب أو أي فلتر */
     if(!barChart || !pieChart || !radarChart){
-      alert("Charts are not ready yet.");
-      return;
+      applyFilter();
     }
 
     const rowsEls =
       document.querySelectorAll("#rows tr");
-
-    if(!rowsEls.length){
-      alert("No data available for the current filters.");
-      return;
-    }
 
     const filteredActivities =
       activities.filter(activity => {
@@ -1902,6 +1888,59 @@ function exportPDF(){
       return;
     }
 
+    /* ترتيب الدورات حسب مجموع الإجابات الصحيحة لجميع الطلاب */
+    const courseSummaryPDF = {};
+
+    filteredActivities.forEach(activity => {
+
+      const courseKey = [
+        activity.courseId || "",
+        activity.course || "",
+        activity.branch || "",
+        activity.section || "",
+        activity.period || "",
+        activity.trainer || ""
+      ].join("__");
+
+      if(!courseSummaryPDF[courseKey]){
+        courseSummaryPDF[courseKey] = {
+          course: activity.course || "Unknown Course",
+          trainer: activity.trainer || "-",
+          period: activity.period || "-",
+          branch: activity.branch || "-",
+          section: activity.section || "-",
+          students: new Set(),
+          participations: 0,
+          totalAnswers: 0,
+          correctAnswers: 0
+        };
+      }
+
+      const item = courseSummaryPDF[courseKey];
+
+      item.students.add(
+        activity.studentId ||
+        activity.studentIqama ||
+        activity.studentName ||
+        "unknown"
+      );
+
+      item.participations++;
+      item.totalAnswers += Number(activity.totalAnswers || 0);
+      item.correctAnswers += Number(activity.correctAnswers || 0);
+
+    });
+
+    const courseRankingPDF =
+      Object.values(courseSummaryPDF)
+        .sort((a,b)=>
+          b.correctAnswers - a.correctAnswers ||
+          b.totalAnswers - a.totalAnswers ||
+          b.participations - a.participations
+        );
+
+    const bestCoursePDF = courseRankingPDF[0] || null;
+
     const {jsPDF} =
       window.jspdf;
 
@@ -1948,18 +1987,23 @@ function exportPDF(){
       45
     );
 
-    const bestPct =
-      getBestTrainersByPercentage();
-
     doc.setFontSize(10);
     doc.setFont("helvetica","normal");
 
     doc.text(
-      "Best Trainer: " +
-      bestPct.best.join(", ") +
-      " - " +
-      bestPct.maxPct.toFixed(1) +
-      "%",
+      bestCoursePDF
+      ? (
+          "Best Course: " +
+          cleanTextForPDF(bestCoursePDF.course) +
+          " - " +
+          bestCoursePDF.correctAnswers +
+          " Correct Answers" +
+          " | Trainer: " +
+          cleanTextForPDF(bestCoursePDF.trainer) +
+          " | Period: " +
+          cleanTextForPDF(bestCoursePDF.period)
+        )
+      : "Best Course: No Data",
       100,
       63
     );
@@ -2260,7 +2304,7 @@ function exportPDF(){
     doc.setFontSize(19);
 
     doc.text(
-      "Top Students by Correct Answers",
+      "Best Course and Top Students by Correct Answers",
       W / 2,
       42,
       {align:"center"}
@@ -2274,11 +2318,48 @@ function exportPDF(){
     doc.setFontSize(9);
 
     doc.text(
-      "Ranking based on the current selected filters",
+      "Trainer and all other filters are optional",
       W / 2,
       59,
       {align:"center"}
     );
+
+    if(bestCoursePDF){
+
+      doc.setFillColor(255,244,184);
+      doc.setDrawColor(...BRAND);
+      doc.setLineWidth(1);
+
+      doc.roundedRect(
+        48,
+        84,
+        W - 96,
+        38,
+        8,
+        8,
+        "FD"
+      );
+
+      doc.setTextColor(...BRAND);
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(11);
+
+      doc.text(
+        "1st Place Course: " +
+        cleanTextForPDF(bestCoursePDF.course) +
+        " | " +
+        bestCoursePDF.correctAnswers +
+        " Correct Answers" +
+        " | Trainer: " +
+        cleanTextForPDF(bestCoursePDF.trainer) +
+        " | Period: " +
+        cleanTextForPDF(bestCoursePDF.period),
+        W / 2,
+        108,
+        {align:"center", maxWidth:W - 120}
+      );
+
+    }
 
     const cards = [
 
@@ -2362,7 +2443,7 @@ function exportPDF(){
 
       doc.roundedRect(
         card.x,
-        98,
+        132,
         width,
         182,
         12,
@@ -2373,7 +2454,7 @@ function exportPDF(){
       drawCup(
         doc,
         centerX,
-        112,
+        146,
         card.cup,
         card.number
       );
@@ -2389,7 +2470,7 @@ function exportPDF(){
       doc.text(
         card.rank,
         centerX,
-        178,
+        212,
         {align:"center"}
       );
 
@@ -2421,7 +2502,7 @@ function exportPDF(){
         doc.text(
           lines,
           centerX,
-          196,
+          230,
           {align:"center"}
         );
 
@@ -2456,7 +2537,7 @@ function exportPDF(){
             185
           ),
           centerX,
-          218,
+          252,
           {align:"center"}
         );
 
@@ -2466,7 +2547,7 @@ function exportPDF(){
             185
           ),
           centerX,
-          233,
+          267,
           {align:"center"}
         );
 
@@ -2476,7 +2557,7 @@ function exportPDF(){
             185
           ),
           centerX,
-          248,
+          282,
           {align:"center"}
         );
 
@@ -2486,7 +2567,7 @@ function exportPDF(){
           card.student.correctAnswers +
           " Correct Answers",
           centerX,
-          263,
+          297,
           {align:"center"}
         );
 
@@ -2494,7 +2575,7 @@ function exportPDF(){
           accuracy +
           "% Accuracy",
           centerX,
-          276,
+          310,
           {align:"center"}
         );
 
@@ -2510,7 +2591,7 @@ function exportPDF(){
         doc.text(
           "No Student",
           centerX,
-          220,
+          254,
           {align:"center"}
         );
 
@@ -2586,7 +2667,7 @@ function exportPDF(){
 
     doc.autoTable({
 
-      startY:300,
+      startY:334,
 
       head:[[
         "Rank",
