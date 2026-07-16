@@ -404,7 +404,7 @@ authDomain:"prudle-system.firebaseapp.com",
 projectId:"prudle-system"
 });
 const db = firebase.firestore();
-const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ37iQFlsJOxSipu9ax0ZQM5d-YX_rMyDckLHomT6ETSVVA9eJZFeNF-PME&s=10";
+const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR5XtbpTPqDzRdCvBMBegJW63noFs4-0H_8NM1kIOjXA&s=10";
 const BRAND = [22, 58, 107];
 let activities=[];
 let courseRecords=[];
@@ -2301,7 +2301,16 @@ function exportPDF(){
 
     /* شعار برودل في صفحة الكؤوس */
     try{
- 
+      doc.setFillColor(255,255,255);
+      doc.roundedRect(
+        24,
+        10,
+        58,
+        56,
+        8,
+        8,
+        "F"
+      );
 
       doc.addImage(
         LOGO_URL,
