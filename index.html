@@ -2304,7 +2304,7 @@ function exportPDF(){
     doc.setFontSize(19);
 
     doc.text(
-      "Best Course and Top Students by Correct Answers",
+      "Top Courses by Combined Correct Answers",
       W / 2,
       42,
       {align:"center"}
@@ -2364,8 +2364,8 @@ function exportPDF(){
     const cards = [
 
       {
-        student:
-          ranking[0] || null,
+        course:
+          courseRankingPDF[0] || null,
 
         rank:
           "1st Place",
@@ -2384,8 +2384,8 @@ function exportPDF(){
       },
 
       {
-        student:
-          ranking[1] || null,
+        course:
+          courseRankingPDF[1] || null,
 
         rank:
           "2nd Place",
@@ -2404,8 +2404,8 @@ function exportPDF(){
       },
 
       {
-        student:
-          ranking[2] || null,
+        course:
+          courseRankingPDF[2] || null,
 
         rank:
           "3rd Place",
@@ -2474,33 +2474,33 @@ function exportPDF(){
         {align:"center"}
       );
 
-      if(card.student){
+      if(card.course){
 
         const accuracy =
-          card.student.totalAnswers > 0
+          card.course.totalAnswers > 0
           ? (
-              card.student.correctAnswers /
-              card.student.totalAnswers *
+              card.course.correctAnswers /
+              card.course.totalAnswers *
               100
             ).toFixed(1)
           : "0.0";
 
-        const name =
+        const courseName =
           cleanTextForPDF(
-            card.student.studentName
+            card.course.course
           ) ||
-          "Student";
+          "Course";
 
-        const lines =
+        const courseLines =
           doc.splitTextToSize(
-            name,
+            courseName,
             180
           );
 
-        doc.setFontSize(10.5);
+        doc.setFontSize(11);
 
         doc.text(
-          lines,
+          courseLines,
           centerX,
           230,
           {align:"center"}
@@ -2513,61 +2513,41 @@ function exportPDF(){
 
         doc.setFontSize(8.5);
 
-        const courseLine =
-          "Course: " +
-          cleanTextForPDF(
-            card.student.course || "-"
-          );
-
-        const trainerLine =
+        doc.text(
           "Trainer: " +
           cleanTextForPDF(
-            card.student.trainer || "-"
-          );
+            card.course.trainer || "-"
+          ),
+          centerX,
+          255,
+          {align:"center"}
+        );
 
-        const periodLine =
+        doc.text(
           "Period: " +
           cleanTextForPDF(
-            card.student.period || "-"
-          );
-
-        doc.text(
-          doc.splitTextToSize(
-            courseLine,
-            185
+            card.course.period || "-"
           ),
           centerX,
-          252,
+          270,
           {align:"center"}
         );
 
         doc.text(
-          doc.splitTextToSize(
-            trainerLine,
-            185
-          ),
+          "Students: " +
+          card.course.students.size,
           centerX,
-          267,
-          {align:"center"}
-        );
-
-        doc.text(
-          doc.splitTextToSize(
-            periodLine,
-            185
-          ),
-          centerX,
-          282,
+          285,
           {align:"center"}
         );
 
         doc.setFontSize(9);
 
         doc.text(
-          card.student.correctAnswers +
+          card.course.correctAnswers +
           " Correct Answers",
           centerX,
-          297,
+          300,
           {align:"center"}
         );
 
@@ -2575,7 +2555,7 @@ function exportPDF(){
           accuracy +
           "% Accuracy",
           centerX,
-          310,
+          313,
           {align:"center"}
         );
 
@@ -2589,7 +2569,7 @@ function exportPDF(){
         doc.setFontSize(10);
 
         doc.text(
-          "No Student",
+          "No Course",
           centerX,
           254,
           {align:"center"}
@@ -2600,14 +2580,14 @@ function exportPDF(){
     });
 
     const rankingBody =
-      ranking.map(
-        (student,index) => {
+      courseRankingPDF.map(
+        (course,index) => {
 
           const accuracy =
-            student.totalAnswers > 0
+            course.totalAnswers > 0
             ? (
-                student.correctAnswers /
-                student.totalAnswers *
+                course.correctAnswers /
+                course.totalAnswers *
                 100
               ).toFixed(1) + "%"
             : "0%";
@@ -2631,31 +2611,29 @@ function exportPDF(){
             rankText,
 
             cleanTextForPDF(
-              student.studentName
+              course.course
             ),
 
             cleanTextForPDF(
-              student.studentIqama
+              course.trainer
             ),
 
             cleanTextForPDF(
-              student.course
+              course.period
             ),
 
-            cleanTextForPDF(
-              student.trainer
-            ),
+            course.students.size,
 
-            student.participations,
+            course.participations,
 
-            student.totalAnswers,
+            course.totalAnswers,
 
-            student.correctAnswers,
+            course.correctAnswers,
 
             Math.max(
               0,
-              student.totalAnswers -
-              student.correctAnswers
+              course.totalAnswers -
+              course.correctAnswers
             ),
 
             accuracy
@@ -2671,10 +2649,10 @@ function exportPDF(){
 
       head:[[
         "Rank",
-        "Student",
-        "Student ID",
         "Course",
         "Trainer",
+        "Period",
+        "Students",
         "Participations",
         "Total",
         "Correct",
