@@ -2077,102 +2077,879 @@ best.push(trainer);
 });
 return { best, maxPct };
 }
-function exportPDF(){
-if(!hasAnyFilter()){ alert("Please select at least one filter first."); return; }
-if(!barChart||!pieChart||!radarChart){ alert("Charts are not ready yet."); return; }
-const rowsEls=document.querySelectorAll("#rows tr");
-if(!rowsEls.length){ alert("No data available for the current filters."); return; }
-const {jsPDF}=window.jspdf;
-const doc=new jsPDF("landscape","pt","a4");
-const W=842;
-doc.setFillColor(...BRAND); doc.rect(0,0,W,78,"F");
-doc.addImage(LOGO_URL,"PNG",36,14,50,50);
-doc.setTextColor(255); doc.setFontSize(18); doc.setFont("helvetica","bold");
-doc.text("Weekly Trainer Activity Performance Report",100,48);
-const bestPct = getBestTrainersByPercentage();
-doc.setFontSize(11);
-doc.setFont("helvetica","normal");
-doc.text(
-`Best Trainer (by Percentage): ${bestPct.best.join(", ")} — ${bestPct.maxPct.toFixed(1)}%`,
-100,
-66
-);
-doc.setFontSize(10); doc.setFont("helvetica","normal");
-doc.text("Generated: "+new Date().toLocaleDateString("en-GB"),W-36,48,{align:"right"});
-doc.addImage(barChart.toBase64Image(),"PNG",36,90,260,170);
-doc.addImage(pieChart.toBase64Image(),"PNG",316,90,230,170);
-doc.addImage(radarChart.toBase64Image(),"PNG",566,90,240,170);
-const body=[];
-rowsEls.forEach(tr=>{
-const tds=tr.querySelectorAll("td");
-body.push(
-[0,1,2,3,4,5,6,7,8,9]
-.map(i=>cleanTextForPDF(tds[i].innerText))
-);
-});
-doc.autoTable({
-startY:275,
-head:[[
-"#","Trainer","Students","Student Count","Activity Names",
-"Start Date","Total","Activities","Percentage","Rating"
-]],
-body,
-styles:{fontSize:10,cellPadding:6,halign:"center",valign:"middle",lineWidth:0.9,lineColor:BRAND,textColor:[22,58,107]},
-headStyles:{fillColor:BRAND,textColor:255,fontStyle:"bold",lineWidth:0.9,lineColor:BRAND},
-alternateRowStyles:{fillColor:[245,249,255]},
-didParseCell(d){
-if(d.section==="body"&&d.column.index===9){
-const v=String(d.cell.raw||"");
-if(v.includes("Excellent")){ d.cell.styles.fillColor=[46,204,113]; d.cell.styles.textColor=255; d.cell.styles.fontStyle="bold"; }
-else if(v.includes("Very Good")){ d.cell.styles.fillColor=[52,152,219]; d.cell.styles.textColor=255; d.cell.styles.fontStyle="bold"; }
-else if(v.includes("Good")){ d.cell.styles.fillColor=[241,196,15]; d.cell.styles.textColor=[40,40,40]; d.cell.styles.fontStyle="bold"; }
-}
-}
-});
-const y=doc.lastAutoTable.finalY+18;
-doc.setDrawColor(...BRAND); doc.setLineWidth(1); doc.line(36,y,W-36,y);
-doc.setFontSize(9); doc.setTextColor(120);
-doc.text("Prudle Education • Administrative Report",W/2,y+14,{align:"center"});
-doc.save("Weekly_Trainer_Activity_Report.pdf");
-}
-function exportCertificate(){
-const trainer=certificateTrainer.value;
-if(!trainer){ alert("Please select one trainer for the certificate."); return; }
-if(!analysis.stats||!analysis.stats[trainer]){ alert("No data found for selected trainer with current filters."); return; }
-const d=analysis.stats[trainer];
-const courseName=d.course||""; const branchName=d.branch||"";
-const dateStr=fmtCertificateDate(new Date());
-const {jsPDF}=window.jspdf;
-const doc=new jsPDF("landscape","pt","a4");
-const W=842,H=595;
-doc.setDrawColor(201,162,39); doc.setLineWidth(10); doc.rect(25,25,W-50,H-50);
-doc.setDrawColor(230,200,90); doc.setLineWidth(1.5); doc.rect(44,44,W-88,H-88);
-doc.addImage(LOGO_URL,"PNG",70,70,70,70);
-doc.setTextColor(30); doc.setFont("helvetica","bold"); doc.setFontSize(38);
-doc.text("Certificate of Excellence",W/2,195,{align:"center"});
-// اسم المدرب (تلقائي)
-doc.setFont("helvetica","bold");
-doc.setFontSize(28);
-doc.text(trainer, W/2, 245, { align:"center" });
-// خط تحت الاسم
-doc.setDrawColor(120);
-doc.setLineWidth(1);
-doc.line(W/2 - 180, 255, W/2 + 180, 255);
-doc.setFont("helvetica","normal");
-doc.setFontSize(16);
-doc.text(
-"In recognition of your outstanding performance and valuable contribution to the training program. " +
-"Your dedication and commitment are sincerely appreciated.",
-W/2,
-320,
-{ align:"center", maxWidth: 460 }
-);
-doc.setDrawColor(150); doc.setLineWidth(1);
-doc.line(120,470,340,470); doc.line(W-340,470,W-120,470);
-doc.setFontSize(12); doc.setTextColor(90);
-doc.text("Director Signature",230,490,{align:"center"});
-doc.text("Stamp",W-230,490,{align:"center"});
-doc.save("Trainer_Certificate.pdf");
+async function exportPDF(){
+
+  if(!activities.length){
+    alert("No student activity data available.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+
+  const doc =
+    new jsPDF(
+      "landscape",
+      "pt",
+      "a4"
+    );
+
+  const W = 842;
+  const H = 595;
+
+  /* =====================================
+     تطبيق نفس الفلاتر الحالية
+  ===================================== */
+
+  const filteredActivities =
+    activities.filter(activity => {
+
+      if(
+        trainerFilter.value &&
+        activity.trainer !== trainerFilter.value
+      ){
+        return false;
+      }
+
+      if(
+        courseFilter.value &&
+        activity.course !== courseFilter.value
+      ){
+        return false;
+      }
+
+      if(
+        periodFilter.value &&
+        activity.period !== periodFilter.value
+      ){
+        return false;
+      }
+
+      if(
+        sectionFilter.value &&
+        activity.section !== sectionFilter.value
+      ){
+        return false;
+      }
+
+      if(
+        startDateFilter.value &&
+        activity.startDate !== startDateFilter.value
+      ){
+        return false;
+      }
+
+      return true;
+
+    });
+
+  if(!filteredActivities.length){
+    alert("No data available for the selected filters.");
+    return;
+  }
+
+  /* =====================================
+     تجميع إجابات كل طالب
+  ===================================== */
+
+  const studentSummary = {};
+
+  filteredActivities.forEach(activity => {
+
+    const key =
+      activity.studentId ||
+      activity.studentIqama ||
+      activity.studentName ||
+      "unknown";
+
+    if(!studentSummary[key]){
+
+      studentSummary[key] = {
+
+        studentName:
+          activity.studentName ||
+          "Unknown Student",
+
+        studentIqama:
+          activity.studentIqama ||
+          activity.studentId ||
+          "-",
+
+        trainer:
+          activity.trainer ||
+          "-",
+
+        course:
+          activity.course ||
+          "-",
+
+        branch:
+          activity.branch ||
+          "-",
+
+        section:
+          activity.section ||
+          "-",
+
+        period:
+          activity.period ||
+          "-",
+
+        participations: 0,
+
+        totalAnswers: 0,
+
+        correctAnswers: 0,
+
+        activities: []
+
+      };
+
+    }
+
+    const student =
+      studentSummary[key];
+
+    student.participations++;
+
+    student.totalAnswers +=
+      Number(
+        activity.totalAnswers || 0
+      );
+
+    student.correctAnswers +=
+      Number(
+        activity.correctAnswers || 0
+      );
+
+    student.activities.push({
+
+      activityName:
+        activity.activityName ||
+        "-",
+
+      totalAnswers:
+        Number(
+          activity.totalAnswers || 0
+        ),
+
+      correctAnswers:
+        Number(
+          activity.correctAnswers || 0
+        ),
+
+      date:
+        activity.startDate ||
+        "-"
+
+    });
+
+  });
+
+  /* =====================================
+     ترتيب الطلاب حسب الإجابات الصحيحة
+  ===================================== */
+
+  const ranking =
+    Object.values(studentSummary)
+      .sort((a,b) =>
+
+        b.correctAnswers -
+        a.correctAnswers ||
+
+        b.totalAnswers -
+        a.totalAnswers ||
+
+        b.participations -
+        a.participations
+
+      );
+
+  const firstStudent =
+    ranking[0] || null;
+
+  const secondStudent =
+    ranking[1] || null;
+
+  const thirdStudent =
+    ranking[2] || null;
+
+  /* =====================================
+     رأس الصفحة
+  ===================================== */
+
+  doc.setFillColor(...BRAND);
+
+  doc.rect(
+    0,
+    0,
+    W,
+    82,
+    "F"
+  );
+
+  try{
+
+    doc.addImage(
+      LOGO_URL,
+      "PNG",
+      32,
+      14,
+      52,
+      52
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Logo could not be added:",
+      error
+    );
+
+  }
+
+  doc.setTextColor(255);
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
+
+  doc.setFontSize(18);
+
+  doc.text(
+    "Student Activity Answers Report",
+    100,
+    40
+  );
+
+  doc.setFontSize(10);
+
+  doc.setFont(
+    "helvetica",
+    "normal"
+  );
+
+  doc.text(
+    "Generated: " +
+    new Date()
+      .toLocaleDateString("en-GB"),
+    W - 32,
+    40,
+    {
+      align: "right"
+    }
+  );
+
+  doc.text(
+    "Students: " +
+    ranking.length +
+    "   |   Activities: " +
+    filteredActivities.length,
+    100,
+    60
+  );
+
+  /* =====================================
+     بيان الكؤوس
+  ===================================== */
+
+  let trophyY = 105;
+
+  doc.setTextColor(...BRAND);
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
+
+  doc.setFontSize(16);
+
+  doc.text(
+    "Top Students",
+    W / 2,
+    trophyY,
+    {
+      align: "center"
+    }
+  );
+
+  const trophyCards = [
+
+    {
+      student: firstStudent,
+      rank: "1st Place",
+      trophy: "1",
+      x: 70,
+      fill: [255, 216, 90]
+    },
+
+    {
+      student: secondStudent,
+      rank: "2nd Place",
+      trophy: "2",
+      x: 315,
+      fill: [220, 227, 235]
+    },
+
+    {
+      student: thirdStudent,
+      rank: "3rd Place",
+      trophy: "3",
+      x: 560,
+      fill: [220, 161, 107]
+    }
+
+  ];
+
+  trophyCards.forEach(card => {
+
+    doc.setFillColor(
+      ...card.fill
+    );
+
+    doc.roundedRect(
+      card.x,
+      120,
+      210,
+      105,
+      10,
+      10,
+      "F"
+    );
+
+    doc.setDrawColor(...BRAND);
+
+    doc.roundedRect(
+      card.x,
+      120,
+      210,
+      105,
+      10,
+      10
+    );
+
+    doc.setTextColor(...BRAND);
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.setFontSize(20);
+
+    doc.text(
+      card.trophy,
+      card.x + 105,
+      147,
+      {
+        align: "center"
+      }
+    );
+
+    doc.setFontSize(11);
+
+    doc.text(
+      card.rank,
+      card.x + 105,
+      165,
+      {
+        align: "center"
+      }
+    );
+
+    if(card.student){
+
+      doc.setFontSize(12);
+
+      doc.text(
+        cleanTextForPDF(
+          card.student.studentName
+        ),
+        card.x + 105,
+        184,
+        {
+          align: "center",
+          maxWidth: 185
+        }
+      );
+
+      doc.setFontSize(10);
+
+      doc.setFont(
+        "helvetica",
+        "normal"
+      );
+
+      const accuracy =
+        card.student.totalAnswers > 0
+        ? (
+            card.student.correctAnswers /
+            card.student.totalAnswers *
+            100
+          ).toFixed(1)
+        : "0.0";
+
+      doc.text(
+        card.student.correctAnswers +
+        " Correct Answers",
+        card.x + 105,
+        202,
+        {
+          align: "center"
+        }
+      );
+
+      doc.text(
+        accuracy +
+        "% Accuracy",
+        card.x + 105,
+        216,
+        {
+          align: "center"
+        }
+      );
+
+    }else{
+
+      doc.setFontSize(11);
+
+      doc.text(
+        "No Student",
+        card.x + 105,
+        190,
+        {
+          align: "center"
+        }
+      );
+
+    }
+
+  });
+
+  /* =====================================
+     ملخص ترتيب الطلاب
+  ===================================== */
+
+  const summaryBody =
+    ranking.map(
+      (student,index) => {
+
+        const accuracy =
+          student.totalAnswers > 0
+          ? (
+              student.correctAnswers /
+              student.totalAnswers *
+              100
+            ).toFixed(1) + "%"
+          : "0%";
+
+        let rank = index + 1;
+
+        if(index === 0){
+          rank = "1 - Cup";
+        }else if(index === 1){
+          rank = "2 - Silver";
+        }else if(index === 2){
+          rank = "3 - Bronze";
+        }
+
+        return [
+
+          rank,
+
+          cleanTextForPDF(
+            student.studentName
+          ),
+
+          cleanTextForPDF(
+            student.studentIqama
+          ),
+
+          cleanTextForPDF(
+            student.course
+          ),
+
+          cleanTextForPDF(
+            student.trainer
+          ),
+
+          student.participations,
+
+          student.totalAnswers,
+
+          student.correctAnswers,
+
+          accuracy
+
+        ];
+
+      }
+    );
+
+  doc.autoTable({
+
+    startY: 245,
+
+    head: [[
+      "Rank",
+      "Student",
+      "Student ID",
+      "Course",
+      "Trainer",
+      "Participations",
+      "Total Answers",
+      "Correct Answers",
+      "Accuracy"
+    ]],
+
+    body: summaryBody,
+
+    styles: {
+
+      fontSize: 8,
+
+      cellPadding: 4,
+
+      halign: "center",
+
+      valign: "middle",
+
+      lineWidth: 0.5,
+
+      lineColor: BRAND,
+
+      textColor: BRAND
+
+    },
+
+    headStyles: {
+
+      fillColor: BRAND,
+
+      textColor: 255,
+
+      fontStyle: "bold"
+
+    },
+
+    alternateRowStyles: {
+
+      fillColor: [
+        245,
+        249,
+        255
+      ]
+
+    },
+
+    didParseCell(data){
+
+      if(
+        data.section === "body" &&
+        data.row.index === 0
+      ){
+
+        data.cell.styles.fillColor =
+          [255,244,191];
+
+        data.cell.styles.fontStyle =
+          "bold";
+
+      }
+
+      if(
+        data.section === "body" &&
+        data.row.index === 1
+      ){
+
+        data.cell.styles.fillColor =
+          [237,242,247];
+
+      }
+
+      if(
+        data.section === "body" &&
+        data.row.index === 2
+      ){
+
+        data.cell.styles.fillColor =
+          [249,225,202];
+
+      }
+
+    }
+
+  });
+
+  /* =====================================
+     صفحة جديدة لتفاصيل كل نشاط وإجابة
+  ===================================== */
+
+  doc.addPage(
+    "a4",
+    "landscape"
+  );
+
+  doc.setFillColor(...BRAND);
+
+  doc.rect(
+    0,
+    0,
+    W,
+    65,
+    "F"
+  );
+
+  doc.setTextColor(255);
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
+
+  doc.setFontSize(17);
+
+  doc.text(
+    "Detailed Student Answers",
+    34,
+    40
+  );
+
+  const detailsBody = [];
+
+  ranking.forEach(
+    (student,studentIndex) => {
+
+      student.activities.forEach(
+        (activity,activityIndex) => {
+
+          const accuracy =
+            activity.totalAnswers > 0
+            ? (
+                activity.correctAnswers /
+                activity.totalAnswers *
+                100
+              ).toFixed(1) + "%"
+            : "0%";
+
+          detailsBody.push([
+
+            activityIndex === 0
+            ? studentIndex + 1
+            : "",
+
+            activityIndex === 0
+            ? cleanTextForPDF(
+                student.studentName
+              )
+            : "",
+
+            activityIndex === 0
+            ? cleanTextForPDF(
+                student.studentIqama
+              )
+            : "",
+
+            cleanTextForPDF(
+              activity.activityName
+            ),
+
+            activity.totalAnswers,
+
+            activity.correctAnswers,
+
+            activity.totalAnswers -
+            activity.correctAnswers,
+
+            accuracy,
+
+            cleanTextForPDF(
+              activity.date
+            ),
+
+            activityIndex === 0
+            ? cleanTextForPDF(
+                student.course
+              )
+            : "",
+
+            activityIndex === 0
+            ? cleanTextForPDF(
+                student.trainer
+              )
+            : ""
+
+          ]);
+
+        }
+      );
+
+    }
+  );
+
+  doc.autoTable({
+
+    startY: 82,
+
+    head: [[
+      "#",
+      "Student",
+      "Student ID",
+      "Activity",
+      "Total",
+      "Correct",
+      "Incorrect",
+      "Accuracy",
+      "Date",
+      "Course",
+      "Trainer"
+    ]],
+
+    body: detailsBody,
+
+    styles: {
+
+      fontSize: 7.5,
+
+      cellPadding: 4,
+
+      halign: "center",
+
+      valign: "middle",
+
+      lineWidth: 0.5,
+
+      lineColor: BRAND,
+
+      textColor: BRAND
+
+    },
+
+    headStyles: {
+
+      fillColor: BRAND,
+
+      textColor: 255,
+
+      fontStyle: "bold"
+
+    },
+
+    alternateRowStyles: {
+
+      fillColor: [
+        245,
+        249,
+        255
+      ]
+
+    },
+
+    columnStyles: {
+
+      0: {
+        cellWidth: 25
+      },
+
+      1: {
+        cellWidth: 85
+      },
+
+      2: {
+        cellWidth: 70
+      },
+
+      3: {
+        cellWidth: 105
+      },
+
+      4: {
+        cellWidth: 42
+      },
+
+      5: {
+        cellWidth: 45
+      },
+
+      6: {
+        cellWidth: 45
+      },
+
+      7: {
+        cellWidth: 50
+      },
+
+      8: {
+        cellWidth: 65
+      },
+
+      9: {
+        cellWidth: 85
+      },
+
+      10: {
+        cellWidth: 75
+      }
+
+    },
+
+    didParseCell(data){
+
+      if(
+        data.section === "body" &&
+        data.column.index === 5
+      ){
+
+        data.cell.styles.fillColor =
+          [223,247,232];
+
+        data.cell.styles.textColor =
+          [25,135,84];
+
+        data.cell.styles.fontStyle =
+          "bold";
+
+      }
+
+      if(
+        data.section === "body" &&
+        data.column.index === 6 &&
+        Number(data.cell.raw) > 0
+      ){
+
+        data.cell.styles.fillColor =
+          [255,235,235];
+
+        data.cell.styles.textColor =
+          [192,57,43];
+
+      }
+
+    },
+
+    didDrawPage(){
+
+      doc.setFontSize(8);
+
+      doc.setTextColor(120);
+
+      doc.text(
+        "Prudle Education - Student Activity Report",
+        W / 2,
+        H - 16,
+        {
+          align: "center"
+        }
+      );
+
+    }
+
+  });
+
+  doc.save(
+    "Student_Activity_Answers_Report.pdf"
+  );
+
 }
 </script>
 
