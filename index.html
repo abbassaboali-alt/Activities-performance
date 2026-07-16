@@ -335,7 +335,7 @@ Delete All Activities
 <div id="recordsLoadingNote" class="loading-note">
 Loading courses and students from Firebase...
 </div>
-<div class="saved-activities-wrap">
+<div id="savedActivitiesSection" class="saved-activities-wrap hidden">
 <table>
 <thead>
 <tr><th>#</th><th>Student</th><th>Student ID</th><th>Trainer</th><th>Activity</th><th>Course</th><th>Total Answers</th><th>Correct Answers</th><th>Accuracy</th><th>Date</th><th>Period</th><th>Section</th><th>Branch</th><th>Delete</th>
@@ -346,7 +346,7 @@ Loading courses and students from Firebase...
 </table>
 </div>
 </div>
-<div class="student-summary-card"><h2 class="student-summary-title"><i class="fa-solid fa-users"></i>
+<div id="studentSummarySection" class="student-summary-card hidden"><h2 class="student-summary-title"><i class="fa-solid fa-users"></i>
 Student Participation Summary
 </h2>
 <div class="student-summary-wrap">
@@ -360,7 +360,7 @@ Student Participation Summary
 </table>
 </div>
 </div>
-<div class="course-competition-card"><h2 class="course-competition-title"><i class="fa-solid fa-trophy"></i>
+<div id="courseCompetitionSection" class="course-competition-card hidden"><h2 class="course-competition-title"><i class="fa-solid fa-trophy"></i>
 Course Competition
 </h2>
 <div id="bestClassBanner" class="best-class-banner">
@@ -441,6 +441,72 @@ let analysis={ total:0, stats:{}, weekCount:{}, ratingCount:{}, bestTrainerNames
 function hasAnyFilter(){
 return trainerFilter.value||courseFilter.value||periodFilter.value||
 sectionFilter.value||startDateFilter.value;
+}
+
+function getFilteredActivities(){
+return activities.filter(activity => {
+
+if(
+trainerFilter.value &&
+activity.trainer !== trainerFilter.value
+){
+return false;
+}
+
+if(
+courseFilter.value &&
+activity.course !== courseFilter.value
+){
+return false;
+}
+
+if(
+periodFilter.value &&
+activity.period !== periodFilter.value
+){
+return false;
+}
+
+if(
+sectionFilter.value &&
+activity.section !== sectionFilter.value
+){
+return false;
+}
+
+if(
+startDateFilter.value &&
+activity.startDate !== startDateFilter.value
+){
+return false;
+}
+
+return true;
+
+});
+}
+
+function hideFilteredDataSections(){
+
+savedActivitiesSection.classList.add("hidden");
+studentSummarySection.classList.add("hidden");
+courseCompetitionSection.classList.add("hidden");
+
+savedActivitiesRows.innerHTML = "";
+studentParticipationRows.innerHTML = "";
+courseCompetitionRows.innerHTML = "";
+
+bestClassBanner.textContent =
+"Please select a filter to display course competition data.";
+
+}
+
+function showFilteredDataSections(){
+
+savedActivitiesSection.classList.remove("hidden");
+studentSummarySection.classList.remove("hidden");
+courseCompetitionSection.classList.remove("hidden");
+
 }
 function showContent(){ notice.classList.add("hidden"); content.classList.remove("hidden"); }
 function hideContent(){
@@ -1110,12 +1176,10 @@ updateSelectedStudentIqama();
 function refreshPageData(){
 resetFilters();
 fillFilters();
-renderSavedActivities();
-renderStudentParticipation();
-renderCourseCompetition();
 
-/* عرض جميع البيانات افتراضيًا، والفلاتر اختيارية */
-applyFilter();
+/* لا تعرض الجداول إلا بعد اختيار فلتر */
+hideFilteredDataSections();
+hideContent();
 }
 function resetFilters(){
 trainerFilter.innerHTML =
@@ -1221,12 +1285,14 @@ newTotalAnswers.value = "";
 newCorrectAnswers.value = "";
 newStudent.value = "";
 newStudentIqama.value = "";
-refreshPageData();
-alert("Activity saved successfully.");
+fillFilters();
+hideFilteredDataSections();
+hideContent();
+alert("Activity saved successfully. Select a filter to display the data.");
 }
-function renderSavedActivities(){
+function renderSavedActivities(sourceActivities = activities){
 savedActivitiesRows.innerHTML = "";
-if(!activities.length){
+if(!sourceActivities.length){
 savedActivitiesRows.innerHTML = `
 <tr><td colspan="14" class="empty-row">
 No activities have been added.
@@ -1235,7 +1301,7 @@ No activities have been added.
 `;
 return;
 }
-activities
+sourceActivities
 .slice()
 .sort((a,b)=>
 String(b.startDate || "").localeCompare(String(a.startDate || ""))
@@ -1256,10 +1322,10 @@ Delete
 `;
 });
 }
-function renderStudentParticipation(){
+function renderStudentParticipation(sourceActivities = activities){
 studentParticipationRows.innerHTML = "";
 const summary = {};
-activities.forEach(activity=>{
+sourceActivities.forEach(activity=>{
 const key =
 activity.studentId ||
 activity.studentIqama ||
@@ -1315,10 +1381,10 @@ student.totalAnswers > 0
 `;
 });
 }
-function renderCourseCompetition(){
+function renderCourseCompetition(sourceActivities = activities){
 courseCompetitionRows.innerHTML = "";
 const summary = {};
-activities.forEach(activity=>{
+sourceActivities.forEach(activity=>{
 const courseKey = [
 activity.courseId || "",
 activity.course || "",
@@ -1403,7 +1469,19 @@ activities.filter((a,index)=>
 String(a.id || index) !== String(id)
 );
 saveActivities();
-refreshPageData();
+
+if(hasAnyFilter()){
+const filteredActivities = getFilteredActivities();
+showFilteredDataSections();
+renderSavedActivities(filteredActivities);
+renderStudentParticipation(filteredActivities);
+renderCourseCompetition(filteredActivities);
+applyFilter();
+}else{
+hideFilteredDataSections();
+hideContent();
+}
+
 }
 function deleteAllActivities(){
 if(!activities.length){
@@ -1415,7 +1493,8 @@ return;
 }
 activities = [];
 saveActivities();
-refreshPageData();
+hideFilteredDataSections();
+hideContent();
 }
 function escapeHTML(value){
 return String(value || "")
@@ -1649,8 +1728,36 @@ function fillFilters(){
 updateLinkedFilters();
 }
 function handleLinkedFilterChange(){
+
 updateLinkedFilters();
+
+if(!hasAnyFilter()){
+
+hideFilteredDataSections();
+hideContent();
+return;
+
+}
+
+const filteredActivities =
+getFilteredActivities();
+
+showFilteredDataSections();
+
+renderSavedActivities(
+filteredActivities
+);
+
+renderStudentParticipation(
+filteredActivities
+);
+
+renderCourseCompetition(
+filteredActivities
+);
+
 applyFilter();
+
 }
 [
 trainerFilter,
@@ -1666,7 +1773,12 @@ handleLinkedFilterChange
 });
 function applyFilter(){
 
-/* جميع الفلاتر اختيارية */
+/* لا تعرض التقرير إلا بعد اختيار فلتر واحد على الأقل */
+if(!hasAnyFilter()){
+hideContent();
+return;
+}
+
 showContent();
 rows.innerHTML="";
 if(barChart) barChart.destroy();
@@ -1869,7 +1981,11 @@ function exportPDF(){
 
   try{
 
-    /* يمكن تصدير التقرير بدون اختيار المدرب أو أي فلتر */
+    if(!hasAnyFilter()){
+      alert("Please select at least one filter before exporting the PDF.");
+      return;
+    }
+
     if(!barChart || !pieChart || !radarChart){
       applyFilter();
     }
