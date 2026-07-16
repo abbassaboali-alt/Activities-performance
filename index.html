@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><title>Weekly Trainer Activity Performance</title><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+table{
+font-size:12px !important;
+}
+thead th{
+padding:6px 4px !important;
+font-size:12px !important;
+line-height:1.1 !important;
+}
+tbody td{
+padding:5px 4px !important;
+font-size:12px !important;
+line-height:1.15 !important;
+vertical-align:middle !important;
+}
+td.name-cell{
+padding:4px 6px !important;
+}
+.name-en{
+font-size:12px !important;
+line-height:1.15 !important;
+}
+.name-ar{
+font-size:11px !important;
+line-height:1.1 !important;
+}
+.mini{
+padding:4px 8px !important;
+font-size:11px !important;
+}
+.inline .save,
+.inline .cancel{
+padding:4px 6px !important;
+font-size:11px !important;
+}
+input[type="checkbox"]{
+transform:scale(0.9);
+}
+html, body{
+margin:0 !important; padding:0 !important;
+width:100% !important; max-width:100% !important;
+overflow-x:hidden !important;
+font-family:Poppins, sans-serif;
+background:#f3f6fb; color:#163a6b;
+}
+*,*::before,*::after{ box-sizing:border-box !important; }
+table, div, section{ max-width:100% !important; }
+.header{
+background:linear-gradient(135deg,#163a6b,#1f5fa0);
+color:#fff; padding:18px 16px;
+display:flex; align-items:center; gap:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.12);
+}
+.header img{
+height:54px; background:#fff; padding:6px; border-radius:12px;
+}
+.header .titles{ display:flex; flex-direction:column; line-height:1.15; }
+.header .titles h1{ margin:0; font-size:20px; font-weight:900; }
+.header .titles small{ opacity:.9; font-weight:600; font-size:12px; }
+.wrap{ max-width:1200px; margin:18px auto; padding:0 14px; }
+.card{
+background:#fff; border-radius:18px; padding:18px;
+box-shadow:0 10px 28px rgba(0,0,0,.10);
+border:1px solid #e7eef8;
+}
+.filters{
+display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+gap:10px;
+}
+select{
+width:100%; padding:11px 12px; border-radius:12px;
+border:1px solid #cfd9ea; font-weight:800;
+background:#fbfdff; color:#163a6b;
+}
+select:focus{
+border-color:#1f5fa0;
+box-shadow:0 0 0 4px rgba(31,95,160,.10);
+}
+.notice{
+margin-top:14px; background:#fff7e6; border:1px solid #ffe1aa;
+color:#925c00; border-radius:14px; padding:14px 16px;
+font-weight:900; text-align:center;
+}
+.actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+.btn{
+border:none; border-radius:12px; padding:10px 16px;
+font-weight:900; cursor:pointer; transition:.18s;
+}
+.btn.primary{ background:#163a6b; color:#fff; }
+.btn.primary:hover{ transform:translateY(-1px); background:#1f5fa0; }
+.btn.gold{
+background:linear-gradient(135deg,#c9a227,#ffd56a,#c9a227);
+color:#2b2200;
+}
+.btn.gold:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+.hidden{ display:none !important; }
+.grid3{
+display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
+gap:12px; margin-top:14px;
+}
+.chartBox{
+background:#fff; border:1px solid #dbe7f8; border-radius:14px; padding:10px;
+}
+canvas{ width:100% !important; height:230px !important; }
+.tableWrap{
+margin-top:14px; border:1px solid #cfd9ea;
+border-radius:16px; overflow:hidden;
+}
+table{ width:100%; border-collapse:collapse; background:#fff; }
+thead th{
+background:#163a6b; color:#fff; padding:12px 10px;
+font-weight:900; font-size:12px; border:1px solid #163a6b;
+text-transform:uppercase; letter-spacing:.4px;
+}
+tbody td{
+padding:11px 10px; border:1px solid #cfd9ea;
+text-align:center; font-weight:800; font-size:12px; color:#1b3f74;
+}
+tbody tr:nth-child(even){ background:#f6fbff; }
+.badge{
+display:inline-flex; align-items:center; justify-content:center;
+width:42px; height:42px; border-radius:50%;
+font-weight:900; font-size:11px; color:#fff;
+}
+.badge.ex{ background:#2ecc71; }
+.badge.vg{ background:#3498db; }
+.badge.gd{ background:#f1c40f; color:#2b2b2b; }
+.badge-label{ margin-left:8px; font-weight:900; font-size:12px; }
+.activity-form-card,
+.student-summary-card{
+margin-bottom:16px;
+background:#f8fbff;
+border:1px solid #dbe7f8;
+border-radius:16px;
+padding:16px;
+}
+.activity-form-title,
+.student-summary-title{
+margin:0 0 12px;
+font-size:17px;
+font-weight:900;
+color:#163a6b;
+}
+.activity-form-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+gap:10px;
+}
+.activity-form-grid input,
+.activity-form-grid select{
+width:100%;
+padding:11px 12px;
+border-radius:12px;
+border:1px solid #cfd9ea;
+background:#fff;
+color:#163a6b;
+font-weight:700;
+outline:none;
+}
+.activity-form-grid input:focus,
+.activity-form-grid select:focus{
+border-color:#1f5fa0;
+box-shadow:0 0 0 4px rgba(31,95,160,.10);
+}
+.activity-form-actions{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-top:12px;
+}
+.btn.success{background:#198754;color:#fff;}
+.btn.success:hover{background:#157347;transform:translateY(-1px);}
+.btn.danger{background:#c0392b;color:#fff;}
+.btn.danger:hover{background:#a93226;transform:translateY(-1px);}
+.saved-activities-wrap,
+.student-summary-wrap{
+margin-top:14px;
+border:1px solid #cfd9ea;
+border-radius:14px;
+overflow:auto;
+}
+.saved-activities-wrap table,
+.student-summary-wrap table{
+min-width:1000px;
+}
+.empty-row{
+padding:18px !important;
+color:#7a8798 !important;
+}
+.loading-note{
+margin-top:10px;
+padding:10px 12px;
+border-radius:10px;
+background:#eef6ff;
+color:#164478;
+font-weight:800;
+font-size:12px;
+}
+.best-class-banner{
+margin-bottom:14px;
+padding:16px;
+border-radius:14px;
+background:linear-gradient(135deg,#fff4c2,#ffd86b);
+border:1px solid #e4b82d;
+color:#5d4700;
+font-weight:900;
+text-align:center;
+font-size:16px;
+}
+.course-competition-card{
+margin-bottom:16px;
+background:#fff;
+border:1px solid #dbe7f8;
+border-radius:16px;
+padding:16px;
+}
+.course-competition-title{
+margin:0 0 12px;
+font-size:17px;
+font-weight:900;
+color:#163a6b;
+}
+.answer-input{
+text-align:center;
+}
+.rank-first{
+background:#fff4bf !important;
+}
+.rank-second{
+background:#edf2f7 !important;
+}
+.rank-third{
+background:#f9e1ca !important;
+}
+
+.course-student-count{
+grid-column:1/-1;
+padding:10px 12px;
+border-radius:10px;
+background:#eef6ff;
+border:1px solid #cfe0f5;
+color:#164478;
+font-weight:900;
+text-align:center;
+}
+
+.logout-badge{
+position:fixed;
+top:12px;
+right:14px;
+z-index:9999;
+background:#164478;
+color:#fff;
+padding:7px 20px;
+border-radius:30px;
+border:none;
+font-size:14px;
+font-weight:600;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:8px;
+box-shadow:0 3px 8px rgba(0,0,0,0.18);
+transition:.25s;
+}
+.logout-badge:hover{
+background:#1e5799;
+transform:translateY(-2px);
+}
+
+.student-ranking-card{
+margin-bottom:16px;
+background:#fff;
+border:1px solid #dbe7f8;
+border-radius:16px;
+padding:16px;
+box-shadow:0 8px 22px rgba(22,58,107,.07);
+}
+.student-ranking-title{
+margin:0 0 12px;
+font-size:17px;
+font-weight:900;
+color:#163a6b;
+display:flex;
+align-items:center;
+gap:8px;
+}
+.student-podium{
+display:grid;
+grid-template-columns:repeat(3,minmax(160px,1fr));
+gap:12px;
+margin-bottom:14px;
+}
+.podium-item{
+border-radius:16px;
+padding:16px 12px;
+text-align:center;
+border:1px solid #dbe7f8;
+background:#f8fbff;
+min-height:150px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
+.podium-item.first{
+background:linear-gradient(135deg,#fff5bd,#ffd65a);
+border-color:#ddb323;
+}
+.podium-item.second{
+background:linear-gradient(135deg,#f8fafc,#dbe3ec);
+border-color:#aeb9c6;
+}
+.podium-item.third{
+background:linear-gradient(135deg,#ffe7d1,#dca16b);
+border-color:#bd7b3e;
+}
+.podium-trophy{
+font-size:42px;
+line-height:1;
+margin-bottom:8px;
+}
+.podium-rank{
+font-size:12px;
+font-weight:900;
+opacity:.75;
+}
+.podium-name{
+font-size:15px;
+font-weight:900;
+color:#163a6b;
+margin-top:5px;
+word-break:break-word;
+}
+.podium-score{
+font-size:13px;
+font-weight:900;
+margin-top:6px;
+color:#1b3f74;
+}
+.student-ranking-chart-wrap{
+height:340px;
+border:1px solid #dbe7f8;
+border-radius:14px;
+padding:10px;
+background:#fbfdff;
+}
+#studentRankingCanvas{
+width:100% !important;
+height:100% !important;
+}
+.ranking-empty{
+grid-column:1/-1;
+padding:20px;
+text-align:center;
+font-weight:900;
+color:#7a8798;
+background:#f8fbff;
+border-radius:14px;
+border:1px dashed #cfd9ea;
+}
+@media(max-width:700px){
+.student-podium{grid-template-columns:1fr;}
+.student-ranking-chart-wrap{height:420px;}
+}
+
+</style>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js">
+</script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore-compat.js">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js">
+</script>
+</head>
+<body><button class="logout-badge" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i>
+Logout
+</button>
+<div class="header"><img src="https://prudle.edu.sa/wp-content/uploads/2020/11/about.png" alt="logo" />
+<div class="titles"><h1>Weekly Trainer Activity Performance</h1><small>Administrative Dashboard • Filter to view & export PDF / Certificate</small>
+</div>
+</div>
+<div class="wrap">
+<div class="card">
+<div class="activity-form-card"><h2 class="activity-form-title"><i class="fa-solid fa-circle-plus"></i>
+Add New Student Activity
+</h2>
+<div class="activity-form-grid"><select id="newCourse"><option value="">Select Course</option></select><select id="newBranch"><option value="">Select Branch</option></select><select id="newSection"><option value="">Select Section</option></select><select id="newPeriod"><option value="">Select Period</option></select><select id="newTrainer"><option value="">Select Trainer</option></select><select id="newStudent"><option value="">Select Student</option></select><input id="newStudentIqama" type="text"
+placeholder="Student ID / Iqama" readonly><div class="course-student-count">Students in selected course: <span id="courseStudentCount">0</span></div><input id="newActivityName" type="text"
+placeholder="Activity Name"><input id="newTotalAnswers"
+class="answer-input"
+type="number"
+min="0"
+step="1"
+placeholder="Total Answers"><input id="newCorrectAnswers"
+class="answer-input"
+type="number"
+min="0"
+step="1"
+placeholder="Correct Answers"><input id="newStartDate" type="date">
+</div>
+<div class="activity-form-actions"><button class="btn success" type="button" onclick="addActivity()"><i class="fa-solid fa-floppy-disk"></i>
+Save Activity
+</button><button class="btn danger" type="button" onclick="deleteAllActivities()"><i class="fa-solid fa-trash"></i>
+Delete All Activities
+</button>
+</div>
+<div id="recordsLoadingNote" class="loading-note">
+Loading courses and students from Firebase...
+</div>
+<div class="saved-activities-wrap">
+<table>
+<thead>
+<tr><th>#</th><th>Student</th><th>Student ID</th><th>Trainer</th><th>Activity</th><th>Course</th><th>Total Answers</th><th>Correct Answers</th><th>Accuracy</th><th>Date</th><th>Period</th><th>Section</th><th>Branch</th><th>Delete</th>
+</tr>
+</thead>
+<tbody id="savedActivitiesRows">
+</tbody>
+</table>
+</div>
+</div>
+<div class="student-summary-card"><h2 class="student-summary-title"><i class="fa-solid fa-users"></i>
+Student Participation Summary
+</h2>
+<div class="student-summary-wrap">
+<table>
+<thead>
+<tr><th>#</th><th>Student</th><th>Student ID</th><th>Course</th><th>Branch</th><th>Section</th><th>Trainer</th><th>Participation Count</th><th>Total Answers</th><th>Correct Answers</th><th>Accuracy</th><th>Activity Names</th>
+</tr>
+</thead>
+<tbody id="studentParticipationRows">
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="student-ranking-card">
+<h2 class="student-ranking-title">
+<i class="fa-solid fa-trophy"></i>
+Best Students by Correct Answers
+</h2>
+<div id="studentPodium" class="student-podium">
+<div class="ranking-empty">No student answers have been recorded yet.</div>
+</div>
+<div class="student-ranking-chart-wrap">
+<canvas id="studentRankingCanvas"></canvas>
+</div>
+</div>
+<div class="course-competition-card"><h2 class="course-competition-title"><i class="fa-solid fa-trophy"></i>
+Course Competition
+</h2>
+<div id="bestClassBanner" class="best-class-banner">
+No answers have been recorded yet.
+</div>
+<div class="student-summary-wrap">
+<table>
+<thead>
+<tr><th>Rank</th><th>Course</th><th>Branch</th><th>Section</th><th>Trainer</th><th>Students</th><th>Participations</th><th>Total Answers</th><th>Correct Answers</th><th>Accuracy</th>
+</tr>
+</thead>
+<tbody id="courseCompetitionRows">
+</tbody>
+</table>
+</div>
+</div>
+<div class="filters"><select id="trainerFilter"><option value="">Trainer</option></select><select id="courseFilter"><option value="">Course</option></select><select id="periodFilter"><option value="">Period</option></select><select id="sectionFilter"><option value="">Section</option></select><select id="startDateFilter"><option value="">Start Date</option></select>
+</div>
+<div class="filters" style="margin-top:10px;"><select id="certificateTrainer"><option value="">Select Trainer for Certificate</option></select>
+</div>
+<div class="notice" id="notice">
+Please select at least one filter to display data.
+</div>
+<div id="content" class="hidden">
+<div class="actions"><button class="btn primary" onclick="exportPDF()">Export Administrative PDF (Landscape)</button><button class="btn gold" onclick="exportCertificate()">Export Certificate (One Trainer)</button>
+</div>
+<div class="grid3">
+<div class="chartBox"><canvas id="barCanvas"></canvas>
+</div>
+<div class="chartBox"><canvas id="pieCanvas"></canvas>
+</div>
+<div class="chartBox"><canvas id="radarCanvas"></canvas>
+</div>
+</div>
+<div class="tableWrap">
+<table id="mainTable">
+<thead>
+<tr><th>#</th><th>Trainer</th><th>Students</th><th>Student Count</th><th>Activity Names</th><th>Start Date</th><th>Total</th><th>Activities</th><th>Percentage</th><th>Rating</th>
+</tr>
+</thead>
+<tbody id="rows">
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<script>
+
+firebase.initializeApp({
+apiKey:"AIzaSyCCFBvZosI8dwShZjxvZzI-SU5igEbcOKk",
+authDomain:"prudle-system.firebaseapp.com",
+projectId:"prudle-system"
+});
+const db = firebase.firestore();
+const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ765O0Mj60vI22NsJ_Jzvyd-Hty9Z1wgSY8T2hSg9How&s";
+const BRAND = [22, 58, 107];
+let activities=[];
+let courseRecords=[];
+let studentRecords=[];
+let barChart=null, pieChart=null, radarChart=null, studentRankingChart=null;
+let analysis={ total:0, stats:{}, weekCount:{}, ratingCount:{}, bestTrainerNames:[], topTrainerName:"" };
+function hasAnyFilter(){
+return trainerFilter.value||courseFilter.value||periodFilter.value||
+sectionFilter.value||startDateFilter.value;
+}
+function showContent(){ notice.classList.add("hidden"); content.classList.remove("hidden"); }
+function hideContent(){
+content.classList.add("hidden"); notice.classList.remove("hidden");
+rows.innerHTML="";
+if(barChart) barChart.destroy();
+if(pieChart) pieChart.destroy();
+if(radarChart) radarChart.destroy();
+}
+function rate(total){
+if(total>=3) return {label:"Excellent",cls:"ex"};
+if(total===2) return {label:"Very Good",cls:"vg"};
+return {label:"Good",cls:"gd"};
+}
+function cleanTextForPDF(str){
+return String(str||"").replace(/[\u{1F300}-\u{1FAFF}]/gu,"")
+.replace(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\u024F]/g,"").trim();
+}
+function fmtCertificateDate(d){
+return d.toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"});
+}
+function pick(obj, keys, fallback=""){
+for(const key of keys){
+const value = obj?.[key];
+if(value !== undefined && value !== null && String(value).trim() !== ""){
+return String(value).trim();
+}
+}
+return fallback;
+}
+function normalizeCourse(doc){
+const data = doc.data() || {};
+return {
+id: doc.id,
+courseName: pick(data,[
+"TrainingCourse","trainingCourse","courseName",
+"CourseName","course","title","name"
+]),
+branch: pick(data,["Branch","branch"]),
+section: pick(data,["Section","section","department","Department"]),
+period: pick(data,["Period","period"]),
+trainer: pick(data,["Trainer","trainer","trainerName","Teacher"]),
+startDate: pick(data,["StartingDate","startingDate","startDate"]),
+status: pick(data,["status","Status"])
+};
+}
+function isOpenCourse(course){
+const status =
+String(course?.status || "")
+.trim()
+.toLowerCase();
+return [
+"open",
+"opened",
+"active",
+"ongoing",
+"مفتوح",
+"مفتوحة",
+"نشط",
+"نشطة"
+].includes(status);
+}
+function normalizeStudent(doc){
+const data = doc.data() || {};
+return {
+id: doc.id,
+studentName: pick(data,[
+"studentName","StudentName","name","Name",
+"student_name","fullName","FullName"
+], "Unknown Student"),
+studentIqama: pick(data,[
+"studentIqama","StudentIqama","studentId",
+"StudentID","iqama","Iqama","ID"
+], doc.id),
+courseId: pick(data,[
+"courseId","CourseId","courseID","CourseID"
+]),
+courseName: pick(data,[
+"TrainingCourse","trainingCourse","courseName",
+"CourseName","course"
+]),
+branch: pick(data,["Branch","branch"]),
+section: pick(data,["Section","section","department","Department"]),
+period: pick(data,["Period","period"]),
+trainer: pick(data,["Trainer","trainer","trainerName","Teacher"])
+};
+}
+async function loadFirebaseRecords(){
+recordsLoadingNote.textContent =
+"Loading courses and students from Firebase...";
+const courseCollections = ["Courses","courses"];
+const studentCollections = ["Students","students"];
+courseRecords = [];
+studentRecords = [];
+for(const collectionName of courseCollections){
+try{
+const snap = await db.collection(collectionName).get();
+if(!snap.empty){
+courseRecords =
+snap.docs
+.map(normalizeCourse)
+.filter(isOpenCourse);
+break;
+}
+}catch(error){
+console.warn("Course collection error:",collectionName,error);
+}
+}
+for(const collectionName of studentCollections){
+try{
+const snap = await db.collection(collectionName).get();
+if(!snap.empty){
+studentRecords = snap.docs.map(normalizeStudent);
+break;
+}
+}catch(error){
+console.warn("Student collection error:",collectionName,error);
+}
+}
+recordsLoadingNote.textContent =
+`Loaded ${courseRecords.length} open courses and ${studentRecords.length} students. Students are filtered by the exact selected course.`;
+fillEntrySelectors();
+}
+function loadSavedActivities(){
+const saved =
+localStorage.getItem("prudleTrainerActivities");
+if(saved){
+try{
+activities = JSON.parse(saved) || [];
+}catch(error){
+console.error(error);
+activities = [];
+}
+}else{
+activities = [];
+}
+}
+function saveActivities(){
+localStorage.setItem(
+"prudleTrainerActivities",
+JSON.stringify(activities)
+);
+}
+function uniqueValues(list){
+return [...new Set(
+list.map(v=>String(v || "").trim()).filter(Boolean)
+)].sort();
+}
+function setSelectOptions(selectElement, placeholder, values){
+const currentValue = selectElement.value;
+selectElement.innerHTML =
+`<option value="">${placeholder}</option>`;
+uniqueValues(values).forEach(value=>{
+selectElement.innerHTML +=
+`<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`;
+});
+if([...selectElement.options].some(o=>o.value===currentValue)){
+selectElement.value = currentValue;
+}
+}
+function getSelectedCourseRecord(){
+const selections =
+getEntrySelections();
+return courseRecords.find(course => {
+if(
+selections.course &&
+course.courseName !== selections.course
+) return false;
+if(
+selections.branch &&
+course.branch !== selections.branch
+) return false;
+if(
+selections.section &&
+course.section !== selections.section
+) return false;
+if(
+selections.period &&
+course.period !== selections.period
+) return false;
+if(
+selections.trainer &&
+course.trainer !== selections.trainer
+) return false;
+return true;
+}) || null;
+}
+function getEntrySelections(){
+return {
+course: newCourse.value,
+branch: newBranch.value,
+section: newSection.value,
+period: newPeriod.value,
+trainer: newTrainer.value,
+studentId: newStudent.value
+};
+}
+function getEntrySourceCourses(){
+return courseRecords.map(course => ({
+id: course.id,
+course: course.courseName || "",
+branch: course.branch || "",
+section: course.section || "",
+period: course.period || "",
+trainer: course.trainer || "",
+startDate: course.startDate || ""
+}));
+}
+function getEntrySourceStudents(){
+return studentRecords.map(student => ({
+id: student.id,
+studentName: student.studentName || "",
+studentIqama: student.studentIqama || "",
+courseId: student.courseId || "",
+course: student.courseName || "",
+branch: student.branch || "",
+section: student.section || "",
+period: student.period || "",
+trainer: student.trainer || ""
+}));
+}
+function getSelectedOpenCourseIds(courseName){
+return courseRecords
+.filter(course=>!courseName||course.courseName===courseName)
+.map(course=>String(course.id||""));
+}
+function studentBelongsToSelectedCourse(student,selections){
+if(!selections.course)return true;
+const selectedCourseIds=getSelectedOpenCourseIds(selections.course);
+const studentCourseId=String(student.courseId||"");
+const studentCourseName=String(student.course||"").trim();
+return studentCourseName===selections.course||
+(selectedCourseIds.length>0&&selectedCourseIds.includes(studentCourseId));
+}
+function getStudentsForEntrySelections(selections){
+
+/* يجب اختيار دورة أولًا */
+if(!selections.course){
+return [];
+}
+
+/* تحديد سجل الدورة المختارة بدقة */
+const selectedCourse =
+courseRecords.find(course => {
+
+if(
+String(course.courseName || "").trim() !==
+String(selections.course || "").trim()
+){
+return false;
+}
+
+if(
+selections.branch &&
+String(course.branch || "").trim() !==
+String(selections.branch || "").trim()
+){
+return false;
+}
+
+if(
+selections.section &&
+String(course.section || "").trim() !==
+String(selections.section || "").trim()
+){
+return false;
+}
+
+if(
+selections.period &&
+String(course.period || "").trim() !==
+String(selections.period || "").trim()
+){
+return false;
+}
+
+if(
+selections.trainer &&
+String(course.trainer || "").trim() !==
+String(selections.trainer || "").trim()
+){
+return false;
+}
+
+return true;
+
+});
+
+if(!selectedCourse){
+return [];
+}
+
+const selectedCourseId =
+String(selectedCourse.id || "").trim();
+
+const selectedCourseName =
+String(selectedCourse.courseName || "").trim();
+
+return studentRecords.filter(student => {
+
+const studentCourseId =
+String(student.courseId || "").trim();
+
+const studentCourseName =
+String(student.courseName || "").trim();
+
+/* المطابقة الأساسية والأدق: معرف الدورة */
+if(
+studentCourseId &&
+selectedCourseId &&
+studentCourseId === selectedCourseId
+){
+return true;
+}
+
+/*
+احتياط للسجلات القديمة التي لا تحتوي courseId:
+نطابق اسم الدورة وبقية بيانات الدورة، إن كانت موجودة عند الطالب.
+*/
+if(!studentCourseId){
+
+if(studentCourseName !== selectedCourseName){
+return false;
+}
+
+if(
+student.branch &&
+selectedCourse.branch &&
+String(student.branch).trim() !==
+String(selectedCourse.branch).trim()
+){
+return false;
+}
+
+if(
+student.section &&
+selectedCourse.section &&
+String(student.section).trim() !==
+String(selectedCourse.section).trim()
+){
+return false;
+}
+
+if(
+student.period &&
+selectedCourse.period &&
+String(student.period).trim() !==
+String(selectedCourse.period).trim()
+){
+return false;
+}
+
+if(
+student.trainer &&
+selectedCourse.trainer &&
+String(student.trainer).trim() !==
+String(selectedCourse.trainer).trim()
+){
+return false;
+}
+
+return true;
+
+}
+
+return false;
+
+});
+
+}
+function updateCourseStudentCount(count){
+courseStudentCount.textContent=String(count||0);
+}
+function entryCourseMatches(course, selections, ignoredField=""){
+if(
+ignoredField !== "course" &&
+selections.course &&
+course.course !== selections.course
+) return false;
+if(
+ignoredField !== "branch" &&
+selections.branch &&
+course.branch !== selections.branch
+) return false;
+if(
+ignoredField !== "section" &&
+selections.section &&
+course.section !== selections.section
+) return false;
+if(
+ignoredField !== "period" &&
+selections.period &&
+course.period !== selections.period
+) return false;
+if(
+ignoredField !== "trainer" &&
+selections.trainer &&
+course.trainer !== selections.trainer
+) return false;
+return true;
+}
+function entryStudentMatches(student, selections, ignoredField=""){
+if(
+ignoredField !== "course" &&
+selections.course &&
+student.course !== selections.course
+) return false;
+if(
+ignoredField !== "branch" &&
+selections.branch &&
+student.branch &&
+student.branch !== selections.branch
+) return false;
+if(
+ignoredField !== "section" &&
+selections.section &&
+student.section &&
+student.section !== selections.section
+) return false;
+if(
+ignoredField !== "period" &&
+selections.period &&
+student.period &&
+student.period !== selections.period
+) return false;
+if(
+ignoredField !== "trainer" &&
+selections.trainer &&
+student.trainer &&
+student.trainer !== selections.trainer
+) return false;
+if(
+ignoredField !== "studentId" &&
+selections.studentId &&
+student.id !== selections.studentId
+) return false;
+return true;
+}
+function rebuildEntrySelect(
+selectElement,
+placeholder,
+values,
+previousValue
+){
+selectElement.innerHTML =
+`<option value="">${placeholder}</option>`;
+uniqueValues(values).forEach(value => {
+const option =
+document.createElement("option");
+option.value = value;
+option.textContent = value;
+selectElement.appendChild(option);
+});
+const available =
+[...selectElement.options]
+.some(option => option.value === previousValue);
+selectElement.value =
+available ? previousValue : "";
+}
+function updateEntryLinkedSelectors(){
+const courseSource =
+getEntrySourceCourses();
+const studentSource =
+getEntrySourceStudents();
+for(let pass = 0; pass < 2; pass++){
+let selections =
+getEntrySelections();
+const previousCourse =
+newCourse.value;
+rebuildEntrySelect(
+newCourse,
+"Select Course",
+courseSource
+.filter(course =>
+entryCourseMatches(
+course,
+selections,
+"course"
+)
+)
+.map(course => course.course),
+previousCourse
+);
+selections =
+getEntrySelections();
+const previousBranch =
+newBranch.value;
+rebuildEntrySelect(
+newBranch,
+"Select Branch",
+courseSource
+.filter(course =>
+entryCourseMatches(
+course,
+selections,
+"branch"
+)
+)
+.map(course => course.branch)
+.concat(
+studentSource
+.filter(student =>
+entryStudentMatches(
+student,
+selections,
+"branch"
+)
+)
+.map(student => student.branch)
+),
+previousBranch
+);
+selections =
+getEntrySelections();
+const previousSection =
+newSection.value;
+rebuildEntrySelect(
+newSection,
+"Select Section",
+courseSource
+.filter(course =>
+entryCourseMatches(
+course,
+selections,
+"section"
+)
+)
+.map(course => course.section)
+.concat(
+studentSource
+.filter(student =>
+entryStudentMatches(
+student,
+selections,
+"section"
+)
+)
+.map(student => student.section)
+),
+previousSection
+);
+selections =
+getEntrySelections();
+const previousPeriod =
+newPeriod.value;
+rebuildEntrySelect(
+newPeriod,
+"Select Period",
+courseSource
+.filter(course =>
+entryCourseMatches(
+course,
+selections,
+"period"
+)
+)
+.map(course => course.period)
+.concat(
+studentSource
+.filter(student =>
+entryStudentMatches(
+student,
+selections,
+"period"
+)
+)
+.map(student => student.period)
+),
+previousPeriod
+);
+selections =
+getEntrySelections();
+const previousTrainer =
+newTrainer.value;
+rebuildEntrySelect(
+newTrainer,
+"Select Trainer",
+courseSource
+.filter(course =>
+entryCourseMatches(
+course,
+selections,
+"trainer"
+)
+)
+.map(course => course.trainer)
+.concat(
+studentSource
+.filter(student =>
+entryStudentMatches(
+student,
+selections,
+"trainer"
+)
+)
+.map(student => student.trainer)
+),
+previousTrainer
+);
+selections =
+getEntrySelections();
+const previousStudent =
+newStudent.value;
+const studentsForSelectedCourse =
+getStudentsForEntrySelections(selections);
+newStudent.innerHTML =
+'<option value="">Select Student</option>';
+studentsForSelectedCourse
+.sort((a,b)=>
+a.studentName.localeCompare(b.studentName)
+)
+.forEach(student => {
+const option =
+document.createElement("option");
+option.value = student.id;
+option.textContent =
+`${student.studentName} — ${student.studentIqama}`;
+newStudent.appendChild(option);
+});
+const studentAvailable =
+[...newStudent.options]
+.some(option =>
+option.value === previousStudent
+);
+newStudent.value =
+studentAvailable ? previousStudent : "";
+updateCourseStudentCount(
+studentsForSelectedCourse.length
+);
+}
+updateSelectedStudentIqama();
+autoFillEntryDate();
+}
+function updateSelectedStudentIqama(){
+const student =
+studentRecords.find(student =>
+String(student.id)===String(newStudent.value)||
+String(student.studentIqama)===String(newStudent.value)
+);
+newStudentIqama.value =
+student?.studentIqama || "";
+}
+function autoFillEntryDate(){
+if(newStartDate.value){
+return;
+}
+const selections =
+getEntrySelections();
+const course =
+getEntrySourceCourses().find(course =>
+entryCourseMatches(course,selections)
+);
+if(course?.startDate){
+newStartDate.value =
+String(course.startDate).slice(0,10);
+}
+}
+function fillEntrySelectors(){
+updateEntryLinkedSelectors();
+}
+function handleEntryFilterChange(){
+updateEntryLinkedSelectors();
+}
+function studentChanged(){
+updateSelectedStudentIqama();
+}
+function refreshPageData(){
+resetFilters();
+fillFilters();
+renderSavedActivities();
+renderStudentParticipation();
+renderStudentAnswerRanking();
+renderCourseCompetition();
+if(hasAnyFilter()){
+applyFilter();
+}else{
+hideContent();
+}
+}
+function resetFilters(){
+trainerFilter.innerHTML =
+'<option value="">Trainer</option>';
+courseFilter.innerHTML =
+'<option value="">Course</option>';
+periodFilter.innerHTML =
+'<option value="">Period</option>';
+sectionFilter.innerHTML =
+'<option value="">Section</option>';
+startDateFilter.innerHTML =
+'<option value="">Start Date</option>';
+certificateTrainer.innerHTML =
+'<option value="">Select Trainer for Certificate</option>';
+}
+function addActivity(){
+const student =
+studentRecords.find(s=>
+String(s.id) === String(newStudent.value)
+);
+const course =
+getSelectedCourseRecord();
+const activityName =
+newActivityName.value.trim();
+const startDate =
+newStartDate.value;
+const totalAnswers =
+Math.max(0, Number(newTotalAnswers.value || 0));
+const correctAnswers =
+Math.max(0, Number(newCorrectAnswers.value || 0));
+if(!newCourse.value){
+alert("Please select a course.");
+newCourse.focus();
+return;
+}
+if(!student){
+alert("Please select a student.");
+newStudent.focus();
+return;
+}
+if(!activityName){
+alert("Please enter activity name.");
+newActivityName.focus();
+return;
+}
+if(!startDate){
+alert("Please select activity date.");
+newStartDate.focus();
+return;
+}
+if(!Number.isFinite(totalAnswers) || !Number.isFinite(correctAnswers)){
+alert("Please enter valid answer numbers.");
+return;
+}
+if(correctAnswers > totalAnswers){
+alert("Correct answers cannot be greater than total answers.");
+newCorrectAnswers.focus();
+return;
+}
+activities.push({
+id:
+Date.now().toString() +
+Math.random().toString(16).slice(2),
+studentId: student.id,
+studentName: student.studentName,
+studentIqama: student.studentIqama,
+trainer:
+newTrainer.value ||
+course?.trainer ||
+student.trainer ||
+"",
+activityName,
+totalAnswers,
+correctAnswers,
+courseId:
+course?.id ||
+student.courseId ||
+"",
+course:
+newCourse.value ||
+student.courseName ||
+"",
+startDate,
+period:
+newPeriod.value ||
+course?.period ||
+student.period ||
+"",
+section:
+newSection.value ||
+course?.section ||
+student.section ||
+"",
+branch:
+newBranch.value ||
+course?.branch ||
+student.branch ||
+""
+});
+saveActivities();
+newActivityName.value = "";
+newTotalAnswers.value = "";
+newCorrectAnswers.value = "";
+newStudent.value = "";
+newStudentIqama.value = "";
+refreshPageData();
+alert("Activity saved successfully.");
+}
+function renderSavedActivities(){
+savedActivitiesRows.innerHTML = "";
+if(!activities.length){
+savedActivitiesRows.innerHTML = `
+<tr><td colspan="14" class="empty-row">
+No activities have been added.
+</td>
+</tr>
+`;
+return;
+}
+activities
+.slice()
+.sort((a,b)=>
+String(b.startDate || "").localeCompare(String(a.startDate || ""))
+)
+.forEach((a,index)=>{
+savedActivitiesRows.innerHTML += `
+<tr><td>${index + 1}</td><td>${escapeHTML(a.studentName || "-")}</td><td>${escapeHTML(a.studentIqama || a.studentId || "-")}</td><td>${escapeHTML(a.trainer || "-")}</td><td>${escapeHTML(a.activityName)}</td><td>${escapeHTML(a.course)}</td><td>${Number(a.totalAnswers || 0)}</td><td>${Number(a.correctAnswers || 0)}</td><td>${
+Number(a.totalAnswers || 0) > 0
+? ((Number(a.correctAnswers || 0) / Number(a.totalAnswers || 0)) * 100).toFixed(1) + "%"
+: "0%"
+}</td><td>${escapeHTML(a.startDate)}</td><td>${escapeHTML(a.period || "-")}</td><td>${escapeHTML(a.section || "-")}</td><td>${escapeHTML(a.branch || "-")}</td><td><button
+class="btn danger mini"
+type="button"
+onclick="deleteActivity('${a.id || index}')">
+Delete
+</button></td>
+</tr>
+`;
+});
+}
+function renderStudentParticipation(){
+studentParticipationRows.innerHTML = "";
+const summary = {};
+activities.forEach(activity=>{
+const key =
+activity.studentId ||
+activity.studentIqama ||
+activity.studentName ||
+"unknown";
+if(!summary[key]){
+summary[key] = {
+studentName: activity.studentName || "Unknown Student",
+studentIqama:
+activity.studentIqama ||
+activity.studentId ||
+"-",
+course: activity.course || "-",
+branch: activity.branch || "-",
+section: activity.section || "-",
+trainer: activity.trainer || "-",
+count:0,
+totalAnswers:0,
+correctAnswers:0,
+activityNames:new Set()
+};
+}
+summary[key].count++;
+summary[key].totalAnswers += Number(activity.totalAnswers || 0);
+summary[key].correctAnswers += Number(activity.correctAnswers || 0);
+if(activity.activityName){
+summary[key].activityNames.add(activity.activityName);
+}
+});
+const rowsData =
+Object.values(summary)
+.sort((a,b)=>
+b.correctAnswers - a.correctAnswers ||
+b.count - a.count
+);
+if(!rowsData.length){
+studentParticipationRows.innerHTML = `
+<tr><td colspan="12" class="empty-row">
+No student participation records.
+</td>
+</tr>
+`;
+return;
+}
+rowsData.forEach((student,index)=>{
+studentParticipationRows.innerHTML += `
+<tr><td>${index + 1}</td><td>${escapeHTML(student.studentName)}</td><td>${escapeHTML(student.studentIqama)}</td><td>${escapeHTML(student.course)}</td><td>${escapeHTML(student.branch)}</td><td>${escapeHTML(student.section)}</td><td>${escapeHTML(student.trainer)}</td><td>${student.count}</td><td>${student.totalAnswers}</td><td>${student.correctAnswers}</td><td>${
+student.totalAnswers > 0
+? ((student.correctAnswers / student.totalAnswers) * 100).toFixed(1) + "%"
+: "0%"
+}</td><td>${[...student.activityNames].map(escapeHTML).join("<br>")}</td>
+</tr>
+`;
+});
+}
+
+function renderStudentAnswerRanking(){
+
+const podium =
+document.getElementById("studentPodium");
+
+const canvas =
+document.getElementById("studentRankingCanvas");
+
+if(!podium || !canvas){
+return;
+}
+
+const summary = {};
+
+activities.forEach(activity => {
+
+const key =
+activity.studentId ||
+activity.studentIqama ||
+activity.studentName ||
+"unknown";
+
+if(!summary[key]){
+summary[key] = {
+studentName:
+activity.studentName ||
+"Unknown Student",
+studentIqama:
+activity.studentIqama ||
+activity.studentId ||
+"",
+correctAnswers:0,
+totalAnswers:0,
+participations:0
+};
+}
+
+summary[key].correctAnswers +=
+Number(activity.correctAnswers || 0);
+
+summary[key].totalAnswers +=
+Number(activity.totalAnswers || 0);
+
+summary[key].participations++;
+
+});
+
+const ranking =
+Object.values(summary)
+.sort((a,b) =>
+b.correctAnswers - a.correctAnswers ||
+b.totalAnswers - a.totalAnswers ||
+b.participations - a.participations ||
+String(a.studentName).localeCompare(
+String(b.studentName)
+)
+);
+
+if(studentRankingChart){
+studentRankingChart.destroy();
+studentRankingChart = null;
+}
+
+if(!ranking.length){
+
+podium.innerHTML = `
+<div class="ranking-empty">
+No student answers have been recorded yet.
+</div>
+`;
+
+return;
+}
+
+const trophyData = [
+{className:"first",icon:"🏆",rank:"1st Place"},
+{className:"second",icon:"🥈",rank:"2nd Place"},
+{className:"third",icon:"🥉",rank:"3rd Place"}
+];
+
+podium.innerHTML = "";
+
+ranking.slice(0,3).forEach((student,index) => {
+
+const trophy =
+trophyData[index];
+
+const accuracy =
+student.totalAnswers > 0
+? (
+student.correctAnswers /
+student.totalAnswers *
+100
+).toFixed(1)
+: "0.0";
+
+podium.innerHTML += `
+<div class="podium-item ${trophy.className}">
+<div class="podium-trophy">${trophy.icon}</div>
+<div class="podium-rank">${trophy.rank}</div>
+<div class="podium-name">${escapeHTML(student.studentName)}</div>
+<div class="podium-score">
+${student.correctAnswers} Correct Answers
+<br>
+${accuracy}% Accuracy
+</div>
+</div>
+`;
+
+});
+
+const topStudents =
+ranking.slice(0,10);
+
+studentRankingChart =
+new Chart(canvas,{
+type:"bar",
+data:{
+labels:
+topStudents.map((student,index) => {
+
+if(index === 0){
+return "🏆 " + student.studentName;
+}
+
+if(index === 1){
+return "🥈 " + student.studentName;
+}
+
+if(index === 2){
+return "🥉 " + student.studentName;
+}
+
+return student.studentName;
+
+}),
+datasets:[{
+label:"Correct Answers",
+data:
+topStudents.map(student =>
+student.correctAnswers
+),
+borderWidth:1,
+borderRadius:8
+}]
+},
+options:{
+indexAxis:"y",
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+legend:{
+display:false
+},
+tooltip:{
+callbacks:{
+afterLabel:function(context){
+
+const student =
+topStudents[context.dataIndex];
+
+const accuracy =
+student.totalAnswers > 0
+? (
+student.correctAnswers /
+student.totalAnswers *
+100
+).toFixed(1)
+: "0.0";
+
+return [
+"Total Answers: " + student.totalAnswers,
+"Accuracy: " + accuracy + "%",
+"Participations: " + student.participations
+];
+
+}
+}
+}
+},
+scales:{
+x:{
+beginAtZero:true,
+ticks:{
+precision:0
+},
+title:{
+display:true,
+text:"Correct Answers"
+}
+},
+y:{
+ticks:{
+autoSkip:false
+}
+}
+}
+}
+});
+
+}
+
+function renderCourseCompetition(){
+courseCompetitionRows.innerHTML = "";
+const summary = {};
+activities.forEach(activity=>{
+const courseKey = [
+activity.courseId || "",
+activity.course || "",
+activity.branch || "",
+activity.section || ""
+].join("__");
+if(!summary[courseKey]){
+summary[courseKey] = {
+course: activity.course || "Unknown Course",
+branch: activity.branch || "-",
+section: activity.section || "-",
+trainer: activity.trainer || "-",
+students:new Set(),
+participations:0,
+totalAnswers:0,
+correctAnswers:0
+};
+}
+const item = summary[courseKey];
+if(activity.studentId || activity.studentIqama || activity.studentName){
+item.students.add(
+activity.studentId ||
+activity.studentIqama ||
+activity.studentName
+);
+}
+item.participations++;
+item.totalAnswers += Number(activity.totalAnswers || 0);
+item.correctAnswers += Number(activity.correctAnswers || 0);
+});
+const ranking =
+Object.values(summary)
+.sort((a,b)=>
+b.correctAnswers - a.correctAnswers ||
+b.totalAnswers - a.totalAnswers ||
+b.participations - a.participations
+);
+if(!ranking.length){
+bestClassBanner.textContent =
+"No answers have been recorded yet.";
+courseCompetitionRows.innerHTML = `
+<tr><td colspan="10" class="empty-row">
+No course competition data.
+</td>
+</tr>
+`;
+return;
+}
+const bestCorrect =
+ranking[0].correctAnswers;
+const bestClasses =
+ranking
+.filter(item=>item.correctAnswers===bestCorrect)
+.map(item=>item.course);
+bestClassBanner.innerHTML = `
+<i class="fa-solid fa-crown"></i>
+Best Class: ${bestClasses.map(escapeHTML).join(" / ")}
+— ${bestCorrect} Correct Answers
+`;
+ranking.forEach((item,index)=>{
+const rank = index + 1;
+const rowClass =
+rank === 1 ? "rank-first" :
+rank === 2 ? "rank-second" :
+rank === 3 ? "rank-third" : "";
+const accuracy =
+item.totalAnswers > 0
+? ((item.correctAnswers / item.totalAnswers) * 100).toFixed(1) + "%"
+: "0%";
+courseCompetitionRows.innerHTML += `
+<tr class="${rowClass}"><td>${rank}</td><td>${escapeHTML(item.course)}</td><td>${escapeHTML(item.branch)}</td><td>${escapeHTML(item.section)}</td><td>${escapeHTML(item.trainer)}</td><td>${item.students.size}</td><td>${item.participations}</td><td>${item.totalAnswers}</td><td>${item.correctAnswers}</td><td>${accuracy}</td>
+</tr>
+`;
+});
+}
+function deleteActivity(id){
+if(!confirm("Delete this activity?")){
+return;
+}
+activities =
+activities.filter((a,index)=>
+String(a.id || index) !== String(id)
+);
+saveActivities();
+refreshPageData();
+}
+function deleteAllActivities(){
+if(!activities.length){
+alert("There are no activities to delete.");
+return;
+}
+if(!confirm("Delete all activities?")){
+return;
+}
+activities = [];
+saveActivities();
+refreshPageData();
+}
+function escapeHTML(value){
+return String(value || "")
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
+}
+newCourse.addEventListener(
+"change",
+handleEntryFilterChange
+);
+newBranch.addEventListener(
+"change",
+handleEntryFilterChange
+);
+newSection.addEventListener(
+"change",
+handleEntryFilterChange
+);
+newPeriod.addEventListener(
+"change",
+handleEntryFilterChange
+);
+newTrainer.addEventListener(
+"change",
+handleEntryFilterChange
+);
+newStudent.addEventListener(
+"change",
+studentChanged
+);
+(async function initializePage(){
+loadSavedActivities();
+await loadFirebaseRecords();
+refreshPageData();
+})();
+function getFilterSourceRecords(){
+const openCourseNames =
+new Set(
+courseRecords
+.map(course => course.courseName)
+.filter(Boolean)
+);
+const courseRows =
+courseRecords.map(course => ({
+trainer: course.trainer || "",
+course: course.courseName || "",
+period: course.period || "",
+section: course.section || "",
+startDate: course.startDate || ""
+}));
+const activityRows =
+activities
+.filter(activity =>
+!activity.course ||
+openCourseNames.has(activity.course)
+)
+.map(activity => ({
+trainer: activity.trainer || "",
+course: activity.course || "",
+period: activity.period || "",
+section: activity.section || "",
+startDate: activity.startDate || ""
+}));
+return [...courseRows, ...activityRows];
+}
+function getMainFilterValues(){
+return {
+trainer: trainerFilter.value,
+course: courseFilter.value,
+period: periodFilter.value,
+section: sectionFilter.value,
+startDate: startDateFilter.value
+};
+}
+function recordMatchesSelections(
+record,
+selections,
+ignoredField = ""
+){
+if(
+ignoredField !== "trainer" &&
+selections.trainer &&
+record.trainer !== selections.trainer
+){
+return false;
+}
+if(
+ignoredField !== "course" &&
+selections.course &&
+record.course !== selections.course
+){
+return false;
+}
+if(
+ignoredField !== "period" &&
+selections.period &&
+record.period !== selections.period
+){
+return false;
+}
+if(
+ignoredField !== "section" &&
+selections.section &&
+record.section !== selections.section
+){
+return false;
+}
+if(
+ignoredField !== "startDate" &&
+selections.startDate &&
+record.startDate !== selections.startDate
+){
+return false;
+}
+return true;
+}
+function rebuildLinkedSelect(
+selectElement,
+placeholder,
+fieldName,
+sourceRecords,
+selections
+){
+const previousValue =
+selectElement.value;
+const availableValues =
+uniqueValues(
+sourceRecords
+.filter(record =>
+recordMatchesSelections(
+record,
+selections,
+fieldName
+)
+)
+.map(record => record[fieldName])
+);
+selectElement.innerHTML =
+`<option value="">${placeholder}</option>`;
+availableValues.forEach(value => {
+const option =
+document.createElement("option");
+option.value = value;
+option.textContent = value;
+selectElement.appendChild(option);
+});
+if(availableValues.includes(previousValue)){
+selectElement.value = previousValue;
+}else{
+selectElement.value = "";
+}
+}
+function updateLinkedFilters(){
+const sourceRecords =
+getFilterSourceRecords();
+for(let pass = 0; pass < 2; pass++){
+const selections =
+getMainFilterValues();
+rebuildLinkedSelect(
+trainerFilter,
+"Trainer",
+"trainer",
+sourceRecords,
+selections
+);
+rebuildLinkedSelect(
+courseFilter,
+"Course",
+"course",
+sourceRecords,
+getMainFilterValues()
+);
+rebuildLinkedSelect(
+periodFilter,
+"Period",
+"period",
+sourceRecords,
+getMainFilterValues()
+);
+rebuildLinkedSelect(
+sectionFilter,
+"Section",
+"section",
+sourceRecords,
+getMainFilterValues()
+);
+rebuildLinkedSelect(
+startDateFilter,
+"Start Date",
+"startDate",
+sourceRecords,
+getMainFilterValues()
+);
+}
+updateCertificateTrainerFilter(sourceRecords);
+}
+function updateCertificateTrainerFilter(sourceRecords){
+const previousValue =
+certificateTrainer.value;
+const selections =
+getMainFilterValues();
+const availableTrainers =
+uniqueValues(
+sourceRecords
+.filter(record =>
+recordMatchesSelections(
+record,
+selections,
+"trainer"
+)
+)
+.map(record => record.trainer)
+);
+certificateTrainer.innerHTML =
+'<option value="">Select Trainer for Certificate</option>';
+availableTrainers.forEach(trainer => {
+const option =
+document.createElement("option");
+option.value = trainer;
+option.textContent = trainer;
+certificateTrainer.appendChild(option);
+});
+if(availableTrainers.includes(previousValue)){
+certificateTrainer.value = previousValue;
+}
+}
+function fillFilters(){
+updateLinkedFilters();
+}
+function handleLinkedFilterChange(){
+updateLinkedFilters();
+applyFilter();
+}
+[
+trainerFilter,
+courseFilter,
+periodFilter,
+sectionFilter,
+startDateFilter
+].forEach(select => {
+select.addEventListener(
+"change",
+handleLinkedFilterChange
+);
+});
+function applyFilter(){
+if(!hasAnyFilter()){
+hideContent();
+return;
+}
+showContent();
+rows.innerHTML="";
+if(barChart) barChart.destroy();
+if(pieChart) pieChart.destroy();
+if(radarChart) radarChart.destroy();
+const unique = new Set();
+const stats = {};
+const weekCount = {};
+const ratingCount = {Excellent:0,"Very Good":0,Good:0};
+activities.forEach(a=>{
+const c = {
+Trainer: a.trainer || "",
+TrainingCourse: a.course || "",
+StartingDate: a.startDate || "",
+Period: a.period || "",
+Section: a.section || "",
+Branch: a.branch || ""
+};
+if(trainerFilter.value && c.Trainer !== trainerFilter.value) return;
+if(courseFilter.value && c.TrainingCourse !== courseFilter.value) return;
+if(periodFilter.value && c.Period !== periodFilter.value) return;
+if(sectionFilter.value && c.Section !== sectionFilter.value) return;
+if(startDateFilter.value && c.StartingDate !== startDateFilter.value) return;
+const key = [
+a.trainer || "",
+a.activityName || "",
+a.course || "",
+a.startDate || "",
+a.period || "",
+a.section || ""
+].join("__");
+if(unique.has(key)) return;
+unique.add(key);
+const trainerName = c.Trainer || a.trainer || "Unknown";
+stats[trainerName] ||= {
+total:0,
+skills:new Set(),
+students:new Set(),
+start:c.StartingDate||"",
+course:c.TrainingCourse||"",
+branch:c.Branch||""
+};
+stats[trainerName].total++;
+const activityName = a.activityName;
+stats[trainerName].skills.add(activityName);
+if(a.studentName){
+stats[trainerName].students.add(a.studentName);
+}
+const chartLabel = a.startDate || "No Date";
+weekCount[chartLabel] = (weekCount[chartLabel] || 0) + 1;
+});
+const total = unique.size;
+const sorted = Object.entries(stats).sort((a,b)=>b[1].total-a[1].total);
+const bestTotal = sorted[0]?.[1]?.total || 0;
+const bestTrainerNames = sorted
+.filter(x=>x[1].total===bestTotal)
+.map(x=>x[0]);
+const topTrainerName = sorted[0]?.[0] || "";
+let i=1;
+sorted.forEach(([t,d])=>{
+const r = rate(d.total);
+ratingCount[r.label]++;
+const pct = total ? ((d.total/total)*100).toFixed(1)+"%" : "0%";
+rows.innerHTML+=`
+<tr><td>${i++}</td><td>${t}</td><td>${[...d.students].join("<br>") || "-"}</td><td>${d.students.size}</td><td>${[...d.skills].join("<br>")}</td><td>${d.start||"-"}</td><td>${d.total}</td><td>${d.skills.size}</td><td>${pct}</td><td><span class="badge ${r.cls}">${r.label[0]}</span><span class="badge-label">${r.label}</span></td>
+</tr>
+`;
+});
+barChart = new Chart(barCanvas,{
+type:"bar",
+data:{
+labels:Object.keys(weekCount),
+datasets:[{data:Object.values(weekCount)}]
+},
+options:{
+plugins:{legend:{display:false}},
+scales:{y:{beginAtZero:true}}
+}
+});
+pieChart = new Chart(pieCanvas,{
+type:"pie",
+data:{
+labels:Object.keys(ratingCount),
+datasets:[{data:Object.values(ratingCount)}]
+}
+});
+const top = stats[topTrainerName] || {total:0,skills:new Set()};
+radarChart = new Chart(radarCanvas,{
+type:"radar",
+data:{
+labels:["Activities","Skills"],
+datasets:[{
+data:[top.total,top.skills.size],
+fill:true
+}]
+},
+options:{plugins:{legend:{display:false}}}
+});
+analysis = {
+total,
+stats,
+weekCount,
+ratingCount,
+bestTrainerNames,
+topTrainerName
+};
+}
+function getBestTrainersByPercentage(){
+const rowsEls = document.querySelectorAll("#rows tr");
+let maxPct = -1;
+let best = [];
+rowsEls.forEach(tr=>{
+const tds = tr.querySelectorAll("td");
+const trainer = tds[1].innerText.trim();
+const pctText = tds[8].innerText.replace("%","").trim();
+const pct = parseFloat(pctText) || 0;
+if(pct > maxPct){
+maxPct = pct;
+best = [trainer];
+}else if(pct === maxPct){
+best.push(trainer);
+}
+});
+return { best, maxPct };
+}
+function exportPDF(){
+if(!hasAnyFilter()){ alert("Please select at least one filter first."); return; }
+if(!barChart||!pieChart||!radarChart){ alert("Charts are not ready yet."); return; }
+const rowsEls=document.querySelectorAll("#rows tr");
+if(!rowsEls.length){ alert("No data available for the current filters."); return; }
+const {jsPDF}=window.jspdf;
+const doc=new jsPDF("landscape","pt","a4");
+const W=842;
+doc.setFillColor(...BRAND); doc.rect(0,0,W,78,"F");
+doc.addImage(LOGO_URL,"PNG",36,14,50,50);
+doc.setTextColor(255); doc.setFontSize(18); doc.setFont("helvetica","bold");
+doc.text("Weekly Trainer Activity Performance Report",100,48);
+const bestPct = getBestTrainersByPercentage();
+doc.setFontSize(11);
+doc.setFont("helvetica","normal");
+doc.text(
+`Best Trainer (by Percentage): ${bestPct.best.join(", ")} — ${bestPct.maxPct.toFixed(1)}%`,
+100,
+66
+);
+doc.setFontSize(10); doc.setFont("helvetica","normal");
+doc.text("Generated: "+new Date().toLocaleDateString("en-GB"),W-36,48,{align:"right"});
+doc.addImage(barChart.toBase64Image(),"PNG",36,90,260,170);
+doc.addImage(pieChart.toBase64Image(),"PNG",316,90,230,170);
+doc.addImage(radarChart.toBase64Image(),"PNG",566,90,240,170);
+const body=[];
+rowsEls.forEach(tr=>{
+const tds=tr.querySelectorAll("td");
+body.push(
+[0,1,2,3,4,5,6,7,8,9]
+.map(i=>cleanTextForPDF(tds[i].innerText))
+);
+});
+doc.autoTable({
+startY:275,
+head:[[
+"#","Trainer","Students","Student Count","Activity Names",
+"Start Date","Total","Activities","Percentage","Rating"
+]],
+body,
+styles:{fontSize:10,cellPadding:6,halign:"center",valign:"middle",lineWidth:0.9,lineColor:BRAND,textColor:[22,58,107]},
+headStyles:{fillColor:BRAND,textColor:255,fontStyle:"bold",lineWidth:0.9,lineColor:BRAND},
+alternateRowStyles:{fillColor:[245,249,255]},
+didParseCell(d){
+if(d.section==="body"&&d.column.index===9){
+const v=String(d.cell.raw||"");
+if(v.includes("Excellent")){ d.cell.styles.fillColor=[46,204,113]; d.cell.styles.textColor=255; d.cell.styles.fontStyle="bold"; }
+else if(v.includes("Very Good")){ d.cell.styles.fillColor=[52,152,219]; d.cell.styles.textColor=255; d.cell.styles.fontStyle="bold"; }
+else if(v.includes("Good")){ d.cell.styles.fillColor=[241,196,15]; d.cell.styles.textColor=[40,40,40]; d.cell.styles.fontStyle="bold"; }
+}
+}
+});
+const y=doc.lastAutoTable.finalY+18;
+doc.setDrawColor(...BRAND); doc.setLineWidth(1); doc.line(36,y,W-36,y);
+doc.setFontSize(9); doc.setTextColor(120);
+doc.text("Prudle Education • Administrative Report",W/2,y+14,{align:"center"});
+doc.save("Weekly_Trainer_Activity_Report.pdf");
+}
+function exportCertificate(){
+const trainer=certificateTrainer.value;
+if(!trainer){ alert("Please select one trainer for the certificate."); return; }
+if(!analysis.stats||!analysis.stats[trainer]){ alert("No data found for selected trainer with current filters."); return; }
+const d=analysis.stats[trainer];
+const courseName=d.course||""; const branchName=d.branch||"";
+const dateStr=fmtCertificateDate(new Date());
+const {jsPDF}=window.jspdf;
+const doc=new jsPDF("landscape","pt","a4");
+const W=842,H=595;
+doc.setDrawColor(201,162,39); doc.setLineWidth(10); doc.rect(25,25,W-50,H-50);
+doc.setDrawColor(230,200,90); doc.setLineWidth(1.5); doc.rect(44,44,W-88,H-88);
+doc.addImage(LOGO_URL,"PNG",70,70,70,70);
+doc.setTextColor(30); doc.setFont("helvetica","bold"); doc.setFontSize(38);
+doc.text("Certificate of Excellence",W/2,195,{align:"center"});
+// اسم المدرب (تلقائي)
+doc.setFont("helvetica","bold");
+doc.setFontSize(28);
+doc.text(trainer, W/2, 245, { align:"center" });
+// خط تحت الاسم
+doc.setDrawColor(120);
+doc.setLineWidth(1);
+doc.line(W/2 - 180, 255, W/2 + 180, 255);
+doc.setFont("helvetica","normal");
+doc.setFontSize(16);
+doc.text(
+"In recognition of your outstanding performance and valuable contribution to the training program. " +
+"Your dedication and commitment are sincerely appreciated.",
+W/2,
+320,
+{ align:"center", maxWidth: 460 }
+);
+doc.setDrawColor(150); doc.setLineWidth(1);
+doc.line(120,470,340,470); doc.line(W-340,470,W-120,470);
+doc.setFontSize(12); doc.setTextColor(90);
+doc.text("Director Signature",230,490,{align:"center"});
+doc.text("Stamp",W-230,490,{align:"center"});
+doc.save("Trainer_Certificate.pdf");
+}
+</script>
+
+</body></html>
