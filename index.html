@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8" /><title>Weekly Trainer Activity Performance - PDF FIX V2</title><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<head><meta charset="UTF-8" /><title>Weekly Trainer Activity Performance</title><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 table{
 font-size:12px !important;
@@ -391,7 +391,6 @@ Please select at least one filter to display data.
 </div>
 </div>
 <script>
-console.log("PRUDLE PDF FIX V2 LOADED");
 function logout(){
 localStorage.removeItem("username");
 localStorage.removeItem("role");
@@ -2388,7 +2387,7 @@ function exportPDF(){
         card.x,
         98,
         width,
-        174,
+        182,
         12,
         12,
         "FD"
@@ -2440,39 +2439,12 @@ function exportPDF(){
             180
           );
 
-        doc.setFontSize(11);
+        doc.setFontSize(10.5);
 
         doc.text(
           lines,
           centerX,
-          198,
-          {align:"center"}
-        );
-
-        /* اسم الدورة */
-        const courseName =
-          cleanTextForPDF(
-            card.student.course || ""
-          ) || "No Course";
-
-        const courseLines =
-          doc.splitTextToSize(
-            courseName,
-            180
-          );
-
-        doc.setFont(
-          "helvetica",
-          "bold"
-        );
-
-        doc.setFontSize(8.5);
-        doc.setTextColor(31,95,160);
-
-        doc.text(
-          courseLines,
-          centerX,
-          222,
+          196,
           {align:"center"}
         );
 
@@ -2481,14 +2453,63 @@ function exportPDF(){
           "normal"
         );
 
-        doc.setFontSize(9.2);
-        doc.setTextColor(...BRAND);
+        doc.setFontSize(8.5);
+
+        const courseLine =
+          "Course: " +
+          cleanTextForPDF(
+            card.student.course || "-"
+          );
+
+        const trainerLine =
+          "Trainer: " +
+          cleanTextForPDF(
+            card.student.trainer || "-"
+          );
+
+        const periodLine =
+          "Period: " +
+          cleanTextForPDF(
+            card.student.period || "-"
+          );
+
+        doc.text(
+          doc.splitTextToSize(
+            courseLine,
+            185
+          ),
+          centerX,
+          218,
+          {align:"center"}
+        );
+
+        doc.text(
+          doc.splitTextToSize(
+            trainerLine,
+            185
+          ),
+          centerX,
+          233,
+          {align:"center"}
+        );
+
+        doc.text(
+          doc.splitTextToSize(
+            periodLine,
+            185
+          ),
+          centerX,
+          248,
+          {align:"center"}
+        );
+
+        doc.setFontSize(9);
 
         doc.text(
           card.student.correctAnswers +
           " Correct Answers",
           centerX,
-          247,
+          263,
           {align:"center"}
         );
 
@@ -2496,7 +2517,7 @@ function exportPDF(){
           accuracy +
           "% Accuracy",
           centerX,
-          262,
+          276,
           {align:"center"}
         );
 
@@ -2512,7 +2533,7 @@ function exportPDF(){
         doc.text(
           "No Student",
           centerX,
-          208,
+          220,
           {align:"center"}
         );
 
@@ -2588,7 +2609,7 @@ function exportPDF(){
 
     doc.autoTable({
 
-      startY:292,
+      startY:300,
 
       head:[[
         "Rank",
