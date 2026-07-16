@@ -477,7 +477,7 @@ No answers have been recorded yet.
 Please select at least one filter to display data.
 </div>
 <div id="content" class="hidden">
-<div class="actions"><button class="btn primary" onclick="exportPDF()">Export Administrative PDF (Landscape)</button><button class="btn gold" onclick="exportCertificate()">Export Certificate (One Trainer)</button>
+<div class="actions"><button class="btn primary" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> Export Student Answers PDF</button><button class="btn gold" onclick="exportCertificate()">Export Certificate (One Trainer)</button>
 </div>
 <div class="grid3">
 <div class="chartBox"><canvas id="barCanvas"></canvas>
@@ -2077,69 +2077,88 @@ best.push(trainer);
 });
 return { best, maxPct };
 }
-function drawPDFTrophy(
-  doc,
-  centerX,
-  topY,
-  cupColor,
-  rankText
-){
 
-  /* جسم الكأس */
-  doc.setFillColor(...cupColor);
+function drawPDFTrophy(doc, centerX, topY, cupColor, rankText){
+
   doc.setDrawColor(110,85,20);
+  doc.setFillColor(...cupColor);
   doc.setLineWidth(1.2);
 
+  /* جسم الكأس */
   doc.roundedRect(
-    centerX - 23,
+    centerX - 22,
     topY,
-    46,
-    34,
-    7,
-    7,
+    44,
+    30,
+    6,
+    6,
     "FD"
   );
 
-  /* مقابض الكأس */
-  doc.setLineWidth(5);
+  /* المقابض — مرسومة بخطوط وأقواس بسيطة مدعومة */
+  doc.setLineWidth(4);
 
-  doc.arc(
-    centerX - 23,
-    topY + 16,
-    14,
-    12,
-    90,
-    270,
-    "S"
+  doc.line(
+    centerX - 22,
+    topY + 8,
+    centerX - 34,
+    topY + 8
   );
 
-  doc.arc(
-    centerX + 23,
-    topY + 16,
-    14,
-    12,
-    270,
-    90,
-    "S"
+  doc.line(
+    centerX - 34,
+    topY + 8,
+    centerX - 34,
+    topY + 22
   );
 
-  /* ساق الكأس */
+  doc.line(
+    centerX - 34,
+    topY + 22,
+    centerX - 22,
+    topY + 22
+  );
+
+  doc.line(
+    centerX + 22,
+    topY + 8,
+    centerX + 34,
+    topY + 8
+  );
+
+  doc.line(
+    centerX + 34,
+    topY + 8,
+    centerX + 34,
+    topY + 22
+  );
+
+  doc.line(
+    centerX + 34,
+    topY + 22,
+    centerX + 22,
+    topY + 22
+  );
+
+  /* الساق */
   doc.setLineWidth(1);
+
+  doc.setFillColor(...cupColor);
 
   doc.rect(
     centerX - 4,
-    topY + 34,
+    topY + 30,
     8,
     14,
     "F"
   );
 
-  /* قاعدة الكأس */
+  /* القاعدة */
   doc.roundedRect(
-    centerX - 17,
-    topY + 47,
-    34,
-    7,
+    centerX - 18,
+    topY + 43,
+    36,
+    8,
     2,
     2,
     "F"
@@ -2148,41 +2167,53 @@ function drawPDFTrophy(
   /* رقم المركز */
   doc.setTextColor(70,55,10);
   doc.setFont("helvetica","bold");
-  doc.setFontSize(16);
+  doc.setFontSize(15);
 
   doc.text(
     String(rankText),
     centerX,
-    topY + 23,
+    topY + 20,
     {
       align:"center"
     }
   );
 
 }
+
 async function exportPDF(){
 
   try{
 
     if(!activities.length){
-
-      alert(
-        "No student activity data available."
-      );
-
+      alert("No student activity data available.");
       return;
+    }
 
+    if(
+      !window.jspdf ||
+      !window.jspdf.jsPDF
+    ){
+      alert("PDF library is not loaded.");
+      return;
     }
 
     const { jsPDF } =
       window.jspdf;
 
     const doc =
-      new jsPDF({
-        orientation:"landscape",
-        unit:"pt",
-        format:"a4"
-      });
+      new jsPDF(
+        "landscape",
+        "pt",
+        "a4"
+      );
+
+    if(
+      typeof doc.autoTable !==
+      "function"
+    ){
+      alert("PDF table library is not loaded.");
+      return;
+    }
 
     const W =
       doc.internal.pageSize.getWidth();
@@ -2191,7 +2222,7 @@ async function exportPDF(){
       doc.internal.pageSize.getHeight();
 
     /* =====================================
-       البيانات المطابقة للفلاتر
+       تطبيق الفلاتر الحالية
     ===================================== */
 
     const filteredActivities =
@@ -2242,124 +2273,45 @@ async function exportPDF(){
       });
 
     if(!filteredActivities.length){
-
-      alert(
-        "No data available for the selected filters."
-      );
-
+      alert("No data available for the selected filters.");
       return;
-
     }
 
     /* =====================================
-       تجميع نتائج كل طالب
+       تجميع بيانات كل طالب
     ===================================== */
 
     const studentSummary = {};
 
-    filteredActivities.forEach(
-      activity => {
+    filteredActivities.forEach(activity => {
 
-        const key =
-          String(
-            activity.studentId ||
-            activity.studentIqama ||
+      const key =
+        String(
+          activity.studentId ||
+          activity.studentIqama ||
+          activity.studentName ||
+          "unknown"
+        );
+
+      if(!studentSummary[key]){
+
+        studentSummary[key] = {
+
+          studentName:
             activity.studentName ||
-            "unknown"
-          );
+            "Unknown Student",
 
-        if(!studentSummary[key]){
-
-          studentSummary[key] = {
-
-            studentName:
-              activity.studentName ||
-              "Unknown Student",
-
-            studentIqama:
-              activity.studentIqama ||
-              activity.studentId ||
-              "-",
-
-            trainer:
-              activity.trainer ||
-              "-",
-
-            course:
-              activity.course ||
-              "-",
-
-            branch:
-              activity.branch ||
-              "-",
-
-            section:
-              activity.section ||
-              "-",
-
-            period:
-              activity.period ||
-              "-",
-
-            participations:0,
-
-            totalAnswers:0,
-
-            correctAnswers:0,
-
-            activities:[]
-
-          };
-
-        }
-
-        const student =
-          studentSummary[key];
-
-        const total =
-          Math.max(
-            0,
-            Number(
-              activity.totalAnswers || 0
-            )
-          );
-
-        const correct =
-          Math.max(
-            0,
-            Number(
-              activity.correctAnswers || 0
-            )
-          );
-
-        student.participations++;
-
-        student.totalAnswers +=
-          total;
-
-        student.correctAnswers +=
-          correct;
-
-        student.activities.push({
-
-          activityName:
-            activity.activityName ||
+          studentIqama:
+            activity.studentIqama ||
+            activity.studentId ||
             "-",
 
-          totalAnswers:
-            total,
+          trainer:
+            activity.trainer ||
+            "-",
 
-          correctAnswers:
-            correct,
-
-          incorrectAnswers:
-            Math.max(
-              0,
-              total - correct
-            ),
-
-          date:
-            activity.startDate ||
+          course:
+            activity.course ||
             "-",
 
           branch:
@@ -2372,12 +2324,91 @@ async function exportPDF(){
 
           period:
             activity.period ||
-            "-"
+            "-",
 
-        });
+          participations:0,
+
+          totalAnswers:0,
+
+          correctAnswers:0,
+
+          activities:[]
+
+        };
 
       }
-    );
+
+      const student =
+        studentSummary[key];
+
+      const totalAnswers =
+        Math.max(
+          0,
+          Number(
+            activity.totalAnswers || 0
+          )
+        );
+
+      const correctAnswers =
+        Math.max(
+          0,
+          Number(
+            activity.correctAnswers || 0
+          )
+        );
+
+      student.participations++;
+
+      student.totalAnswers +=
+        totalAnswers;
+
+      student.correctAnswers +=
+        correctAnswers;
+
+      student.activities.push({
+
+        activityName:
+          activity.activityName ||
+          "-",
+
+        totalAnswers,
+
+        correctAnswers,
+
+        incorrectAnswers:
+          Math.max(
+            0,
+            totalAnswers -
+            correctAnswers
+          ),
+
+        date:
+          activity.startDate ||
+          "-",
+
+        course:
+          activity.course ||
+          student.course,
+
+        trainer:
+          activity.trainer ||
+          student.trainer,
+
+        branch:
+          activity.branch ||
+          student.branch,
+
+        section:
+          activity.section ||
+          student.section,
+
+        period:
+          activity.period ||
+          student.period
+
+      });
+
+    });
 
     /* =====================================
        ترتيب الطلاب
@@ -2387,23 +2418,24 @@ async function exportPDF(){
       Object.values(studentSummary)
         .sort((a,b) => {
 
+          const accuracyA =
+            a.totalAnswers > 0
+            ? a.correctAnswers /
+              a.totalAnswers
+            : 0;
+
+          const accuracyB =
+            b.totalAnswers > 0
+            ? b.correctAnswers /
+              b.totalAnswers
+            : 0;
+
           return (
             b.correctAnswers -
             a.correctAnswers ||
 
-            (
-              b.totalAnswers > 0
-              ? b.correctAnswers /
-                b.totalAnswers
-              : 0
-            ) -
-
-            (
-              a.totalAnswers > 0
-              ? a.correctAnswers /
-                a.totalAnswers
-              : 0
-            ) ||
+            accuracyB -
+            accuracyA ||
 
             b.participations -
             a.participations ||
@@ -2420,7 +2452,7 @@ async function exportPDF(){
         });
 
     /* =====================================
-       الصفحة الأولى
+       الصفحة الأولى: الكؤوس والترتيب
     ===================================== */
 
     doc.setFillColor(...BRAND);
@@ -2429,7 +2461,7 @@ async function exportPDF(){
       0,
       0,
       W,
-      78,
+      76,
       "F"
     );
 
@@ -2439,8 +2471,8 @@ async function exportPDF(){
 
     doc.text(
       "Student Activity Answers Report",
-      32,
-      37
+      30,
+      36
     );
 
     doc.setFont(
@@ -2456,8 +2488,8 @@ async function exportPDF(){
         .toLocaleDateString(
           "en-GB"
         ),
-      W - 32,
-      35,
+      W - 30,
+      34,
       {
         align:"right"
       }
@@ -2466,10 +2498,10 @@ async function exportPDF(){
     doc.text(
       "Students: " +
       ranking.length +
-      "   |   Records: " +
+      "   |   Activity Records: " +
       filteredActivities.length,
-      32,
-      57
+      30,
+      55
     );
 
     doc.setTextColor(...BRAND);
@@ -2479,15 +2511,14 @@ async function exportPDF(){
     doc.text(
       "Top Students",
       W / 2,
-      103,
+      100,
       {
         align:"center"
       }
     );
 
-    /* =====================================
-       بطاقات الكؤوس
-    ===================================== */
+    const cardWidth =
+      220;
 
     const trophyCards = [
 
@@ -2497,11 +2528,11 @@ async function exportPDF(){
 
         rank:"1st Place",
 
-        rankNumber:1,
+        number:1,
 
         x:46,
 
-        fill:[
+        background:[
           255,
           244,
           184
@@ -2520,11 +2551,11 @@ async function exportPDF(){
 
         rank:"2nd Place",
 
-        rankNumber:2,
+        number:2,
 
         x:291,
 
-        fill:[
+        background:[
           235,
           240,
           246
@@ -2543,11 +2574,11 @@ async function exportPDF(){
 
         rank:"3rd Place",
 
-        rankNumber:3,
+        number:3,
 
         x:536,
 
-        fill:[
+        background:[
           250,
           225,
           201
@@ -2564,24 +2595,22 @@ async function exportPDF(){
 
     trophyCards.forEach(card => {
 
-      const cardWidth =
-        220;
-
       const centerX =
         card.x +
         cardWidth / 2;
 
       doc.setFillColor(
-        ...card.fill
+        ...card.background
       );
 
       doc.setDrawColor(...BRAND);
+      doc.setLineWidth(1);
 
       doc.roundedRect(
         card.x,
-        118,
+        114,
         cardWidth,
-        142,
+        146,
         10,
         10,
         "FD"
@@ -2590,9 +2619,9 @@ async function exportPDF(){
       drawPDFTrophy(
         doc,
         centerX,
-        128,
+        125,
         card.cup,
-        card.rankNumber
+        card.number
       );
 
       doc.setTextColor(...BRAND);
@@ -2606,7 +2635,7 @@ async function exportPDF(){
       doc.text(
         card.rank,
         centerX,
-        194,
+        188,
         {
           align:"center"
         }
@@ -2623,24 +2652,24 @@ async function exportPDF(){
             ).toFixed(1)
           : "0.0";
 
-        doc.setFontSize(12);
-
         const studentName =
           cleanTextForPDF(
             card.student.studentName
           ) ||
           "Student";
 
+        doc.setFontSize(11);
+
         const nameLines =
           doc.splitTextToSize(
             studentName,
-            190
+            185
           );
 
         doc.text(
           nameLines,
           centerX,
-          212,
+          207,
           {
             align:"center"
           }
@@ -2651,7 +2680,7 @@ async function exportPDF(){
           "normal"
         );
 
-        doc.setFontSize(9.5);
+        doc.setFontSize(9);
 
         doc.text(
           card.student.correctAnswers +
@@ -2659,7 +2688,7 @@ async function exportPDF(){
           card.student.totalAnswers +
           " Total",
           centerX,
-          238,
+          236,
           {
             align:"center"
           }
@@ -2669,7 +2698,7 @@ async function exportPDF(){
           accuracy +
           "% Accuracy",
           centerX,
-          252,
+          251,
           {
             align:"center"
           }
@@ -2687,7 +2716,7 @@ async function exportPDF(){
         doc.text(
           "No Student",
           centerX,
-          220,
+          218,
           {
             align:"center"
           }
@@ -2696,10 +2725,6 @@ async function exportPDF(){
       }
 
     });
-
-    /* =====================================
-       جدول الترتيب العام
-    ===================================== */
 
     const summaryBody =
       ranking.map(
@@ -2775,11 +2800,11 @@ async function exportPDF(){
 
     doc.autoTable({
 
-      startY:278,
+      startY:276,
 
       margin:{
-        left:24,
-        right:24,
+        left:22,
+        right:22,
         bottom:28
       },
 
@@ -2789,70 +2814,60 @@ async function exportPDF(){
         "Student ID",
         "Course",
         "Trainer",
-        "Participation",
+        "Participations",
         "Total",
         "Correct",
         "Incorrect",
         "Accuracy"
       ]],
 
-      body:summaryBody,
+      body:
+        summaryBody,
 
-      theme:"grid",
+      theme:
+        "grid",
 
       styles:{
 
-        font:"helvetica",
+        font:
+          "helvetica",
 
-        fontSize:7.5,
+        fontSize:
+          7.4,
 
-        cellPadding:3.5,
+        cellPadding:
+          3.5,
 
-        halign:"center",
+        halign:
+          "center",
 
-        valign:"middle",
+        valign:
+          "middle",
 
-        lineWidth:0.4,
+        lineWidth:
+          0.4,
 
-        lineColor:BRAND,
+        lineColor:
+          BRAND,
 
-        textColor:BRAND,
+        textColor:
+          BRAND,
 
-        overflow:"linebreak"
+        overflow:
+          "linebreak"
 
       },
 
       headStyles:{
 
-        fillColor:BRAND,
+        fillColor:
+          BRAND,
 
-        textColor:255,
+        textColor:
+          255,
 
-        fontStyle:"bold"
-
-      },
-
-      columnStyles:{
-
-        0:{
-          cellWidth:65
-        },
-
-        1:{
-          cellWidth:95
-        },
-
-        2:{
-          cellWidth:70
-        },
-
-        3:{
-          cellWidth:90
-        },
-
-        4:{
-          cellWidth:85
-        }
+        fontStyle:
+          "bold"
 
       },
 
@@ -2911,13 +2926,13 @@ async function exportPDF(){
     });
 
     /* =====================================
-       صفحة مستقلة للتفاصيل
+       الصفحة الثانية: التفاصيل
     ===================================== */
 
-    doc.addPage({
-      format:"a4",
-      orientation:"landscape"
-    });
+    doc.addPage(
+      "a4",
+      "landscape"
+    );
 
     doc.setFillColor(...BRAND);
 
@@ -2939,8 +2954,8 @@ async function exportPDF(){
 
     doc.text(
       "Detailed Student Answers",
-      30,
-      38
+      28,
+      37
     );
 
     doc.setFont(
@@ -2951,9 +2966,9 @@ async function exportPDF(){
     doc.setFontSize(9);
 
     doc.text(
-      "Every saved activity and its answer totals",
-      30,
-      55
+      "All saved activity answer totals",
+      28,
+      54
     );
 
     const detailsBody = [];
@@ -2962,10 +2977,7 @@ async function exportPDF(){
       (student,studentIndex) => {
 
         student.activities.forEach(
-          (
-            activity,
-            activityIndex
-          ) => {
+          activity => {
 
             const accuracy =
               activity.totalAnswers > 0
@@ -3005,11 +3017,11 @@ async function exportPDF(){
               ),
 
               cleanTextForPDF(
-                student.course
+                activity.course
               ),
 
               cleanTextForPDF(
-                student.trainer
+                activity.trainer
               ),
 
               cleanTextForPDF(
@@ -3034,11 +3046,11 @@ async function exportPDF(){
 
     doc.autoTable({
 
-      startY:84,
+      startY:82,
 
       margin:{
-        left:18,
-        right:18,
+        left:16,
+        right:16,
         bottom:30
       },
 
@@ -3059,39 +3071,53 @@ async function exportPDF(){
         "Branch"
       ]],
 
-      body:detailsBody,
+      body:
+        detailsBody,
 
-      theme:"grid",
+      theme:
+        "grid",
 
       styles:{
 
-        font:"helvetica",
+        font:
+          "helvetica",
 
-        fontSize:6.8,
+        fontSize:
+          6.6,
 
-        cellPadding:3,
+        cellPadding:
+          2.7,
 
-        halign:"center",
+        halign:
+          "center",
 
-        valign:"middle",
+        valign:
+          "middle",
 
-        lineWidth:0.35,
+        lineWidth:
+          0.35,
 
-        lineColor:BRAND,
+        lineColor:
+          BRAND,
 
-        textColor:BRAND,
+        textColor:
+          BRAND,
 
-        overflow:"linebreak"
+        overflow:
+          "linebreak"
 
       },
 
       headStyles:{
 
-        fillColor:BRAND,
+        fillColor:
+          BRAND,
 
-        textColor:255,
+        textColor:
+          255,
 
-        fontStyle:"bold"
+        fontStyle:
+          "bold"
 
       },
 
@@ -3102,19 +3128,19 @@ async function exportPDF(){
         },
 
         1:{
-          cellWidth:78
+          cellWidth:76
         },
 
         2:{
-          cellWidth:60
+          cellWidth:58
         },
 
         3:{
-          cellWidth:78
+          cellWidth:76
         },
 
         4:{
-          cellWidth:35
+          cellWidth:34
         },
 
         5:{
@@ -3130,27 +3156,27 @@ async function exportPDF(){
         },
 
         8:{
-          cellWidth:55
+          cellWidth:54
         },
 
         9:{
-          cellWidth:72
+          cellWidth:70
         },
 
         10:{
-          cellWidth:65
+          cellWidth:62
         },
 
         11:{
-          cellWidth:60
+          cellWidth:58
         },
 
         12:{
-          cellWidth:55
+          cellWidth:54
         },
 
         13:{
-          cellWidth:55
+          cellWidth:54
         }
 
       },
@@ -3232,13 +3258,12 @@ async function exportPDF(){
       );
 
       doc.setFontSize(8);
-
       doc.setTextColor(110);
 
       doc.text(
         "Prudle Education",
-        26,
-        H - 14
+        24,
+        H - 13
       );
 
       doc.text(
@@ -3246,8 +3271,8 @@ async function exportPDF(){
         page +
         " of " +
         pageCount,
-        W - 26,
-        H - 14,
+        W - 24,
+        H - 13,
         {
           align:"right"
         }
@@ -3269,14 +3294,17 @@ async function exportPDF(){
     alert(
       "PDF export failed: " +
       (
-        error?.message ||
-        error
+        error &&
+        error.message
+        ? error.message
+        : String(error)
       )
     );
 
   }
 
 }
+
 </script>
 
 </body></html>
