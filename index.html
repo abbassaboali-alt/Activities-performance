@@ -1733,9 +1733,7 @@ rows.innerHTML+=`
 <td>${d.total}</td>
 <td>${d.skills.size}</td>
 <td>${pct}</td>
-<td class="rating-cell ${r.cls}">
-${r.label}
-</td>
+<td class="rating-cell ${r.cls}">${r.label}</td>
 </tr>
 `;
 });
@@ -2074,21 +2072,40 @@ function exportPDF(){
       165
     );
 
+    /* إنشاء بيانات الجدول مباشرة لضمان تطابق الحقول في PDF */
     const adminBody = [];
 
-    rowsEls.forEach(tr => {
+    const adminSorted =
+      Object.entries(analysis.stats || {})
+        .sort((a,b) => b[1].total - a[1].total);
 
-      const tds =
-        tr.querySelectorAll("td");
+    adminSorted.forEach(([trainerName,data],index) => {
 
-      adminBody.push(
-        [0,1,2,3,4,5,6,7,8]
-          .map(index =>
-            cleanTextForPDF(
-              tds[index]?.innerText || ""
-            )
-          )
-      );
+      const rating =
+        rate(Number(data.total || 0));
+
+      const percentage =
+        analysis.total
+        ? (
+            Number(data.total || 0) /
+            Number(analysis.total || 1) *
+            100
+          ).toFixed(1) + "%"
+        : "0%";
+
+      adminBody.push([
+        index + 1,
+        cleanTextForPDF(trainerName),
+        data.students?.size || 0,
+        cleanTextForPDF(
+          [...(data.skills || [])].join(" / ")
+        ),
+        cleanTextForPDF(data.start || "-"),
+        Number(data.total || 0),
+        data.skills?.size || 0,
+        percentage,
+        rating.label
+      ]);
 
     });
 
@@ -2131,6 +2148,18 @@ function exportPDF(){
 
       alternateRowStyles:{
         fillColor:[245,249,255]
+      },
+
+      columnStyles:{
+        0:{cellWidth:28},
+        1:{cellWidth:85},
+        2:{cellWidth:72},
+        3:{cellWidth:150},
+        4:{cellWidth:88},
+        5:{cellWidth:55},
+        6:{cellWidth:68},
+        7:{cellWidth:78},
+        8:{cellWidth:88}
       },
 
       didParseCell(data){
@@ -3025,7 +3054,7 @@ function exportPDF(){
     }
 
     doc.save(
-      "Prudle_Course_Competition_With_Cups.pdf"
+      "Prudle_Course_Competition_Corrected.pdf"
     );
 
   }catch(error){
@@ -3097,4 +3126,4 @@ localStorage.removeItem("loginDate");
 location.href = "https://www.prudle-education.com/log-in-out";
 }
 </script>
-</body></html>   
+</body></html>
