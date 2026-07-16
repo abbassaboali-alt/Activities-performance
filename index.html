@@ -404,7 +404,7 @@ authDomain:"prudle-system.firebaseapp.com",
 projectId:"prudle-system"
 });
 const db = firebase.firestore();
-const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ765O0Mj60vI22NsJ_Jzvyd-Hty9Z1wgSY8T2hSg9How&s";
+const LOGO_URL = "https://prudle.edu.sa/wp-content/uploads/2020/11/about.png";
 const BRAND = [22, 58, 107];
 let activities=[];
 let courseRecords=[];
@@ -2299,6 +2299,34 @@ function exportPDF(){
     doc.setFillColor(...BRAND);
     doc.rect(0,0,W,76,"F");
 
+    /* شعار برودل في صفحة الكؤوس */
+    try{
+      doc.setFillColor(255,255,255);
+      doc.roundedRect(
+        24,
+        10,
+        58,
+        56,
+        8,
+        8,
+        "F"
+      );
+
+      doc.addImage(
+        LOGO_URL,
+        "PNG",
+        29,
+        15,
+        48,
+        46
+      );
+    }catch(error){
+      console.warn(
+        "Prudle logo could not be added to cups page:",
+        error
+      );
+    }
+
     doc.setTextColor(255);
     doc.setFont("helvetica","bold");
     doc.setFontSize(19);
@@ -2318,7 +2346,7 @@ function exportPDF(){
     doc.setFontSize(9);
 
     doc.text(
-      "Trainer and all other filters are optional",
+      "One row and one cup per course — student names are not repeated",
       W / 2,
       59,
       {align:"center"}
@@ -2607,37 +2635,20 @@ function exportPDF(){
           }
 
           return [
-
             rankText,
-
-            cleanTextForPDF(
-              course.course
-            ),
-
-            cleanTextForPDF(
-              course.trainer
-            ),
-
-            cleanTextForPDF(
-              course.period
-            ),
-
+            cleanTextForPDF(course.course),
+            cleanTextForPDF(course.trainer),
+            cleanTextForPDF(course.period),
             course.students.size,
-
             course.participations,
-
             course.totalAnswers,
-
             course.correctAnswers,
-
             Math.max(
               0,
               course.totalAnswers -
               course.correctAnswers
             ),
-
             accuracy
-
           ];
 
         }
@@ -2733,6 +2744,34 @@ function exportPDF(){
 
     doc.setFillColor(...BRAND);
     doc.rect(0,0,W,70,"F");
+
+    /* شعار برودل في صفحة التفاصيل */
+    try{
+      doc.setFillColor(255,255,255);
+      doc.roundedRect(
+        W - 80,
+        9,
+        55,
+        52,
+        8,
+        8,
+        "F"
+      );
+
+      doc.addImage(
+        LOGO_URL,
+        "PNG",
+        W - 75,
+        14,
+        45,
+        42
+      );
+    }catch(error){
+      console.warn(
+        "Prudle logo could not be added to details page:",
+        error
+      );
+    }
 
     doc.setTextColor(255);
     doc.setFont(
@@ -2956,7 +2995,7 @@ function exportPDF(){
     }
 
     doc.save(
-      "Weekly_Trainer_Activity_With_Cups.pdf"
+      "Prudle_Course_Competition_With_Cups.pdf"
     );
 
   }catch(error){
