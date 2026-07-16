@@ -2233,39 +2233,16 @@ function exportPDF(){
     });
 
     const ranking =
-      Object.values(studentSummary)
-        .sort((a,b) => {
+  Object.values(studentSummary)
+    .sort((a,b)=>
 
-          const accuracyA =
-            a.totalAnswers > 0
-            ? a.correctAnswers /
-              a.totalAnswers
-            : 0;
+      b.correctAnswers - a.correctAnswers ||
 
-          const accuracyB =
-            b.totalAnswers > 0
-            ? b.correctAnswers /
-              b.totalAnswers
-            : 0;
+      b.totalAnswers - a.totalAnswers ||
 
-          return (
-            b.correctAnswers -
-            a.correctAnswers ||
+      b.participations - a.participations
 
-            accuracyB -
-            accuracyA ||
-
-            b.participations -
-            a.participations ||
-
-            String(a.studentName)
-              .localeCompare(
-                String(b.studentName)
-              )
-          );
-
-        });
-
+    );
     /* =====================================
        الصفحة الثانية: تصميم الكؤوس
     ===================================== */
