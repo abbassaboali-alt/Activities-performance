@@ -2077,878 +2077,1204 @@ best.push(trainer);
 });
 return { best, maxPct };
 }
-async function exportPDF(){
+function drawPDFTrophy(
+  doc,
+  centerX,
+  topY,
+  cupColor,
+  rankText
+){
 
-  if(!activities.length){
-    alert("No student activity data available.");
-    return;
-  }
+  /* جسم الكأس */
+  doc.setFillColor(...cupColor);
+  doc.setDrawColor(110,85,20);
+  doc.setLineWidth(1.2);
 
-  const { jsPDF } = window.jspdf;
+  doc.roundedRect(
+    centerX - 23,
+    topY,
+    46,
+    34,
+    7,
+    7,
+    "FD"
+  );
 
-  const doc =
-    new jsPDF(
-      "landscape",
-      "pt",
-      "a4"
-    );
+  /* مقابض الكأس */
+  doc.setLineWidth(5);
 
-  const W = 842;
-  const H = 595;
+  doc.arc(
+    centerX - 23,
+    topY + 16,
+    14,
+    12,
+    90,
+    270,
+    "S"
+  );
 
-  /* =====================================
-     تطبيق نفس الفلاتر الحالية
-  ===================================== */
+  doc.arc(
+    centerX + 23,
+    topY + 16,
+    14,
+    12,
+    270,
+    90,
+    "S"
+  );
 
-  const filteredActivities =
-    activities.filter(activity => {
-
-      if(
-        trainerFilter.value &&
-        activity.trainer !== trainerFilter.value
-      ){
-        return false;
-      }
-
-      if(
-        courseFilter.value &&
-        activity.course !== courseFilter.value
-      ){
-        return false;
-      }
-
-      if(
-        periodFilter.value &&
-        activity.period !== periodFilter.value
-      ){
-        return false;
-      }
-
-      if(
-        sectionFilter.value &&
-        activity.section !== sectionFilter.value
-      ){
-        return false;
-      }
-
-      if(
-        startDateFilter.value &&
-        activity.startDate !== startDateFilter.value
-      ){
-        return false;
-      }
-
-      return true;
-
-    });
-
-  if(!filteredActivities.length){
-    alert("No data available for the selected filters.");
-    return;
-  }
-
-  /* =====================================
-     تجميع إجابات كل طالب
-  ===================================== */
-
-  const studentSummary = {};
-
-  filteredActivities.forEach(activity => {
-
-    const key =
-      activity.studentId ||
-      activity.studentIqama ||
-      activity.studentName ||
-      "unknown";
-
-    if(!studentSummary[key]){
-
-      studentSummary[key] = {
-
-        studentName:
-          activity.studentName ||
-          "Unknown Student",
-
-        studentIqama:
-          activity.studentIqama ||
-          activity.studentId ||
-          "-",
-
-        trainer:
-          activity.trainer ||
-          "-",
-
-        course:
-          activity.course ||
-          "-",
-
-        branch:
-          activity.branch ||
-          "-",
-
-        section:
-          activity.section ||
-          "-",
-
-        period:
-          activity.period ||
-          "-",
-
-        participations: 0,
-
-        totalAnswers: 0,
-
-        correctAnswers: 0,
-
-        activities: []
-
-      };
-
-    }
-
-    const student =
-      studentSummary[key];
-
-    student.participations++;
-
-    student.totalAnswers +=
-      Number(
-        activity.totalAnswers || 0
-      );
-
-    student.correctAnswers +=
-      Number(
-        activity.correctAnswers || 0
-      );
-
-    student.activities.push({
-
-      activityName:
-        activity.activityName ||
-        "-",
-
-      totalAnswers:
-        Number(
-          activity.totalAnswers || 0
-        ),
-
-      correctAnswers:
-        Number(
-          activity.correctAnswers || 0
-        ),
-
-      date:
-        activity.startDate ||
-        "-"
-
-    });
-
-  });
-
-  /* =====================================
-     ترتيب الطلاب حسب الإجابات الصحيحة
-  ===================================== */
-
-  const ranking =
-    Object.values(studentSummary)
-      .sort((a,b) =>
-
-        b.correctAnswers -
-        a.correctAnswers ||
-
-        b.totalAnswers -
-        a.totalAnswers ||
-
-        b.participations -
-        a.participations
-
-      );
-
-  const firstStudent =
-    ranking[0] || null;
-
-  const secondStudent =
-    ranking[1] || null;
-
-  const thirdStudent =
-    ranking[2] || null;
-
-  /* =====================================
-     رأس الصفحة
-  ===================================== */
-
-  doc.setFillColor(...BRAND);
+  /* ساق الكأس */
+  doc.setLineWidth(1);
 
   doc.rect(
-    0,
-    0,
-    W,
-    82,
+    centerX - 4,
+    topY + 34,
+    8,
+    14,
     "F"
   );
 
-  try{
-
-    doc.addImage(
-      LOGO_URL,
-      "PNG",
-      32,
-      14,
-      52,
-      52
-    );
-
-  }catch(error){
-
-    console.warn(
-      "Logo could not be added:",
-      error
-    );
-
-  }
-
-  doc.setTextColor(255);
-
-  doc.setFont(
-    "helvetica",
-    "bold"
+  /* قاعدة الكأس */
+  doc.roundedRect(
+    centerX - 17,
+    topY + 47,
+    34,
+    7,
+    2,
+    2,
+    "F"
   );
 
-  doc.setFontSize(18);
-
-  doc.text(
-    "Student Activity Answers Report",
-    100,
-    40
-  );
-
-  doc.setFontSize(10);
-
-  doc.setFont(
-    "helvetica",
-    "normal"
-  );
-
-  doc.text(
-    "Generated: " +
-    new Date()
-      .toLocaleDateString("en-GB"),
-    W - 32,
-    40,
-    {
-      align: "right"
-    }
-  );
-
-  doc.text(
-    "Students: " +
-    ranking.length +
-    "   |   Activities: " +
-    filteredActivities.length,
-    100,
-    60
-  );
-
-  /* =====================================
-     بيان الكؤوس
-  ===================================== */
-
-  let trophyY = 105;
-
-  doc.setTextColor(...BRAND);
-
-  doc.setFont(
-    "helvetica",
-    "bold"
-  );
-
+  /* رقم المركز */
+  doc.setTextColor(70,55,10);
+  doc.setFont("helvetica","bold");
   doc.setFontSize(16);
 
   doc.text(
-    "Top Students",
-    W / 2,
-    trophyY,
+    String(rankText),
+    centerX,
+    topY + 23,
     {
-      align: "center"
+      align:"center"
     }
   );
 
-  const trophyCards = [
+}
+async function exportPDF(){
 
-    {
-      student: firstStudent,
-      rank: "1st Place",
-      trophy: "1",
-      x: 70,
-      fill: [255, 216, 90]
-    },
+  try{
 
-    {
-      student: secondStudent,
-      rank: "2nd Place",
-      trophy: "2",
-      x: 315,
-      fill: [220, 227, 235]
-    },
+    if(!activities.length){
 
-    {
-      student: thirdStudent,
-      rank: "3rd Place",
-      trophy: "3",
-      x: 560,
-      fill: [220, 161, 107]
+      alert(
+        "No student activity data available."
+      );
+
+      return;
+
     }
 
-  ];
+    const { jsPDF } =
+      window.jspdf;
 
-  trophyCards.forEach(card => {
+    const doc =
+      new jsPDF({
+        orientation:"landscape",
+        unit:"pt",
+        format:"a4"
+      });
 
-    doc.setFillColor(
-      ...card.fill
+    const W =
+      doc.internal.pageSize.getWidth();
+
+    const H =
+      doc.internal.pageSize.getHeight();
+
+    /* =====================================
+       البيانات المطابقة للفلاتر
+    ===================================== */
+
+    const filteredActivities =
+      activities.filter(activity => {
+
+        if(
+          trainerFilter.value &&
+          String(activity.trainer || "") !==
+          String(trainerFilter.value)
+        ){
+          return false;
+        }
+
+        if(
+          courseFilter.value &&
+          String(activity.course || "") !==
+          String(courseFilter.value)
+        ){
+          return false;
+        }
+
+        if(
+          periodFilter.value &&
+          String(activity.period || "") !==
+          String(periodFilter.value)
+        ){
+          return false;
+        }
+
+        if(
+          sectionFilter.value &&
+          String(activity.section || "") !==
+          String(sectionFilter.value)
+        ){
+          return false;
+        }
+
+        if(
+          startDateFilter.value &&
+          String(activity.startDate || "") !==
+          String(startDateFilter.value)
+        ){
+          return false;
+        }
+
+        return true;
+
+      });
+
+    if(!filteredActivities.length){
+
+      alert(
+        "No data available for the selected filters."
+      );
+
+      return;
+
+    }
+
+    /* =====================================
+       تجميع نتائج كل طالب
+    ===================================== */
+
+    const studentSummary = {};
+
+    filteredActivities.forEach(
+      activity => {
+
+        const key =
+          String(
+            activity.studentId ||
+            activity.studentIqama ||
+            activity.studentName ||
+            "unknown"
+          );
+
+        if(!studentSummary[key]){
+
+          studentSummary[key] = {
+
+            studentName:
+              activity.studentName ||
+              "Unknown Student",
+
+            studentIqama:
+              activity.studentIqama ||
+              activity.studentId ||
+              "-",
+
+            trainer:
+              activity.trainer ||
+              "-",
+
+            course:
+              activity.course ||
+              "-",
+
+            branch:
+              activity.branch ||
+              "-",
+
+            section:
+              activity.section ||
+              "-",
+
+            period:
+              activity.period ||
+              "-",
+
+            participations:0,
+
+            totalAnswers:0,
+
+            correctAnswers:0,
+
+            activities:[]
+
+          };
+
+        }
+
+        const student =
+          studentSummary[key];
+
+        const total =
+          Math.max(
+            0,
+            Number(
+              activity.totalAnswers || 0
+            )
+          );
+
+        const correct =
+          Math.max(
+            0,
+            Number(
+              activity.correctAnswers || 0
+            )
+          );
+
+        student.participations++;
+
+        student.totalAnswers +=
+          total;
+
+        student.correctAnswers +=
+          correct;
+
+        student.activities.push({
+
+          activityName:
+            activity.activityName ||
+            "-",
+
+          totalAnswers:
+            total,
+
+          correctAnswers:
+            correct,
+
+          incorrectAnswers:
+            Math.max(
+              0,
+              total - correct
+            ),
+
+          date:
+            activity.startDate ||
+            "-",
+
+          branch:
+            activity.branch ||
+            "-",
+
+          section:
+            activity.section ||
+            "-",
+
+          period:
+            activity.period ||
+            "-"
+
+        });
+
+      }
     );
 
-    doc.roundedRect(
-      card.x,
-      120,
-      210,
-      105,
-      10,
-      10,
+    /* =====================================
+       ترتيب الطلاب
+    ===================================== */
+
+    const ranking =
+      Object.values(studentSummary)
+        .sort((a,b) => {
+
+          return (
+            b.correctAnswers -
+            a.correctAnswers ||
+
+            (
+              b.totalAnswers > 0
+              ? b.correctAnswers /
+                b.totalAnswers
+              : 0
+            ) -
+
+            (
+              a.totalAnswers > 0
+              ? a.correctAnswers /
+                a.totalAnswers
+              : 0
+            ) ||
+
+            b.participations -
+            a.participations ||
+
+            String(
+              a.studentName
+            ).localeCompare(
+              String(
+                b.studentName
+              )
+            )
+          );
+
+        });
+
+    /* =====================================
+       الصفحة الأولى
+    ===================================== */
+
+    doc.setFillColor(...BRAND);
+
+    doc.rect(
+      0,
+      0,
+      W,
+      78,
       "F"
     );
 
-    doc.setDrawColor(...BRAND);
+    doc.setTextColor(255);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(19);
 
-    doc.roundedRect(
-      card.x,
-      120,
-      210,
-      105,
-      10,
-      10
+    doc.text(
+      "Student Activity Answers Report",
+      32,
+      37
+    );
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.setFontSize(10);
+
+    doc.text(
+      "Generated: " +
+      new Date()
+        .toLocaleDateString(
+          "en-GB"
+        ),
+      W - 32,
+      35,
+      {
+        align:"right"
+      }
+    );
+
+    doc.text(
+      "Students: " +
+      ranking.length +
+      "   |   Records: " +
+      filteredActivities.length,
+      32,
+      57
     );
 
     doc.setTextColor(...BRAND);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(16);
 
+    doc.text(
+      "Top Students",
+      W / 2,
+      103,
+      {
+        align:"center"
+      }
+    );
+
+    /* =====================================
+       بطاقات الكؤوس
+    ===================================== */
+
+    const trophyCards = [
+
+      {
+        student:
+          ranking[0] || null,
+
+        rank:"1st Place",
+
+        rankNumber:1,
+
+        x:46,
+
+        fill:[
+          255,
+          244,
+          184
+        ],
+
+        cup:[
+          230,
+          181,
+          35
+        ]
+      },
+
+      {
+        student:
+          ranking[1] || null,
+
+        rank:"2nd Place",
+
+        rankNumber:2,
+
+        x:291,
+
+        fill:[
+          235,
+          240,
+          246
+        ],
+
+        cup:[
+          180,
+          190,
+          202
+        ]
+      },
+
+      {
+        student:
+          ranking[2] || null,
+
+        rank:"3rd Place",
+
+        rankNumber:3,
+
+        x:536,
+
+        fill:[
+          250,
+          225,
+          201
+        ],
+
+        cup:[
+          190,
+          125,
+          67
+        ]
+      }
+
+    ];
+
+    trophyCards.forEach(card => {
+
+      const cardWidth =
+        220;
+
+      const centerX =
+        card.x +
+        cardWidth / 2;
+
+      doc.setFillColor(
+        ...card.fill
+      );
+
+      doc.setDrawColor(...BRAND);
+
+      doc.roundedRect(
+        card.x,
+        118,
+        cardWidth,
+        142,
+        10,
+        10,
+        "FD"
+      );
+
+      drawPDFTrophy(
+        doc,
+        centerX,
+        128,
+        card.cup,
+        card.rankNumber
+      );
+
+      doc.setTextColor(...BRAND);
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
+      doc.setFontSize(11);
+
+      doc.text(
+        card.rank,
+        centerX,
+        194,
+        {
+          align:"center"
+        }
+      );
+
+      if(card.student){
+
+        const accuracy =
+          card.student.totalAnswers > 0
+          ? (
+              card.student.correctAnswers /
+              card.student.totalAnswers *
+              100
+            ).toFixed(1)
+          : "0.0";
+
+        doc.setFontSize(12);
+
+        const studentName =
+          cleanTextForPDF(
+            card.student.studentName
+          ) ||
+          "Student";
+
+        const nameLines =
+          doc.splitTextToSize(
+            studentName,
+            190
+          );
+
+        doc.text(
+          nameLines,
+          centerX,
+          212,
+          {
+            align:"center"
+          }
+        );
+
+        doc.setFont(
+          "helvetica",
+          "normal"
+        );
+
+        doc.setFontSize(9.5);
+
+        doc.text(
+          card.student.correctAnswers +
+          " Correct / " +
+          card.student.totalAnswers +
+          " Total",
+          centerX,
+          238,
+          {
+            align:"center"
+          }
+        );
+
+        doc.text(
+          accuracy +
+          "% Accuracy",
+          centerX,
+          252,
+          {
+            align:"center"
+          }
+        );
+
+      }else{
+
+        doc.setFont(
+          "helvetica",
+          "normal"
+        );
+
+        doc.setFontSize(10);
+
+        doc.text(
+          "No Student",
+          centerX,
+          220,
+          {
+            align:"center"
+          }
+        );
+
+      }
+
+    });
+
+    /* =====================================
+       جدول الترتيب العام
+    ===================================== */
+
+    const summaryBody =
+      ranking.map(
+        (student,index) => {
+
+          const accuracy =
+            student.totalAnswers > 0
+            ? (
+                student.correctAnswers /
+                student.totalAnswers *
+                100
+              ).toFixed(1) + "%"
+            : "0%";
+
+          let rankText =
+            String(
+              index + 1
+            );
+
+          if(index === 0){
+            rankText =
+              "1 - Gold Cup";
+          }
+
+          if(index === 1){
+            rankText =
+              "2 - Silver Cup";
+          }
+
+          if(index === 2){
+            rankText =
+              "3 - Bronze Cup";
+          }
+
+          return [
+
+            rankText,
+
+            cleanTextForPDF(
+              student.studentName
+            ),
+
+            cleanTextForPDF(
+              student.studentIqama
+            ),
+
+            cleanTextForPDF(
+              student.course
+            ),
+
+            cleanTextForPDF(
+              student.trainer
+            ),
+
+            student.participations,
+
+            student.totalAnswers,
+
+            student.correctAnswers,
+
+            Math.max(
+              0,
+              student.totalAnswers -
+              student.correctAnswers
+            ),
+
+            accuracy
+
+          ];
+
+        }
+      );
+
+    doc.autoTable({
+
+      startY:278,
+
+      margin:{
+        left:24,
+        right:24,
+        bottom:28
+      },
+
+      head:[[
+        "Rank",
+        "Student",
+        "Student ID",
+        "Course",
+        "Trainer",
+        "Participation",
+        "Total",
+        "Correct",
+        "Incorrect",
+        "Accuracy"
+      ]],
+
+      body:summaryBody,
+
+      theme:"grid",
+
+      styles:{
+
+        font:"helvetica",
+
+        fontSize:7.5,
+
+        cellPadding:3.5,
+
+        halign:"center",
+
+        valign:"middle",
+
+        lineWidth:0.4,
+
+        lineColor:BRAND,
+
+        textColor:BRAND,
+
+        overflow:"linebreak"
+
+      },
+
+      headStyles:{
+
+        fillColor:BRAND,
+
+        textColor:255,
+
+        fontStyle:"bold"
+
+      },
+
+      columnStyles:{
+
+        0:{
+          cellWidth:65
+        },
+
+        1:{
+          cellWidth:95
+        },
+
+        2:{
+          cellWidth:70
+        },
+
+        3:{
+          cellWidth:90
+        },
+
+        4:{
+          cellWidth:85
+        }
+
+      },
+
+      didParseCell(data){
+
+        if(
+          data.section ===
+          "body" &&
+          data.row.index === 0
+        ){
+
+          data.cell.styles.fillColor =
+            [
+              255,
+              244,
+              184
+            ];
+
+          data.cell.styles.fontStyle =
+            "bold";
+
+        }
+
+        if(
+          data.section ===
+          "body" &&
+          data.row.index === 1
+        ){
+
+          data.cell.styles.fillColor =
+            [
+              235,
+              240,
+              246
+            ];
+
+        }
+
+        if(
+          data.section ===
+          "body" &&
+          data.row.index === 2
+        ){
+
+          data.cell.styles.fillColor =
+            [
+              250,
+              225,
+              201
+            ];
+
+        }
+
+      }
+
+    });
+
+    /* =====================================
+       صفحة مستقلة للتفاصيل
+    ===================================== */
+
+    doc.addPage({
+      format:"a4",
+      orientation:"landscape"
+    });
+
+    doc.setFillColor(...BRAND);
+
+    doc.rect(
+      0,
+      0,
+      W,
+      70,
+      "F"
+    );
+
+    doc.setTextColor(255);
     doc.setFont(
       "helvetica",
       "bold"
     );
 
-    doc.setFontSize(20);
+    doc.setFontSize(18);
 
     doc.text(
-      card.trophy,
-      card.x + 105,
-      147,
-      {
-        align: "center"
+      "Detailed Student Answers",
+      30,
+      38
+    );
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.setFontSize(9);
+
+    doc.text(
+      "Every saved activity and its answer totals",
+      30,
+      55
+    );
+
+    const detailsBody = [];
+
+    ranking.forEach(
+      (student,studentIndex) => {
+
+        student.activities.forEach(
+          (
+            activity,
+            activityIndex
+          ) => {
+
+            const accuracy =
+              activity.totalAnswers > 0
+              ? (
+                  activity.correctAnswers /
+                  activity.totalAnswers *
+                  100
+                ).toFixed(1) + "%"
+              : "0%";
+
+            detailsBody.push([
+
+              studentIndex + 1,
+
+              cleanTextForPDF(
+                student.studentName
+              ),
+
+              cleanTextForPDF(
+                student.studentIqama
+              ),
+
+              cleanTextForPDF(
+                activity.activityName
+              ),
+
+              activity.totalAnswers,
+
+              activity.correctAnswers,
+
+              activity.incorrectAnswers,
+
+              accuracy,
+
+              cleanTextForPDF(
+                activity.date
+              ),
+
+              cleanTextForPDF(
+                student.course
+              ),
+
+              cleanTextForPDF(
+                student.trainer
+              ),
+
+              cleanTextForPDF(
+                activity.period
+              ),
+
+              cleanTextForPDF(
+                activity.section
+              ),
+
+              cleanTextForPDF(
+                activity.branch
+              )
+
+            ]);
+
+          }
+        );
+
       }
     );
 
-    doc.setFontSize(11);
+    doc.autoTable({
 
-    doc.text(
-      card.rank,
-      card.x + 105,
-      165,
-      {
-        align: "center"
-      }
-    );
+      startY:84,
 
-    if(card.student){
+      margin:{
+        left:18,
+        right:18,
+        bottom:30
+      },
 
-      doc.setFontSize(12);
+      head:[[
+        "#",
+        "Student",
+        "Student ID",
+        "Activity",
+        "Total",
+        "Correct",
+        "Incorrect",
+        "Accuracy",
+        "Date",
+        "Course",
+        "Trainer",
+        "Period",
+        "Section",
+        "Branch"
+      ]],
 
-      doc.text(
-        cleanTextForPDF(
-          card.student.studentName
-        ),
-        card.x + 105,
-        184,
-        {
-          align: "center",
-          maxWidth: 185
+      body:detailsBody,
+
+      theme:"grid",
+
+      styles:{
+
+        font:"helvetica",
+
+        fontSize:6.8,
+
+        cellPadding:3,
+
+        halign:"center",
+
+        valign:"middle",
+
+        lineWidth:0.35,
+
+        lineColor:BRAND,
+
+        textColor:BRAND,
+
+        overflow:"linebreak"
+
+      },
+
+      headStyles:{
+
+        fillColor:BRAND,
+
+        textColor:255,
+
+        fontStyle:"bold"
+
+      },
+
+      columnStyles:{
+
+        0:{
+          cellWidth:22
+        },
+
+        1:{
+          cellWidth:78
+        },
+
+        2:{
+          cellWidth:60
+        },
+
+        3:{
+          cellWidth:78
+        },
+
+        4:{
+          cellWidth:35
+        },
+
+        5:{
+          cellWidth:38
+        },
+
+        6:{
+          cellWidth:40
+        },
+
+        7:{
+          cellWidth:42
+        },
+
+        8:{
+          cellWidth:55
+        },
+
+        9:{
+          cellWidth:72
+        },
+
+        10:{
+          cellWidth:65
+        },
+
+        11:{
+          cellWidth:60
+        },
+
+        12:{
+          cellWidth:55
+        },
+
+        13:{
+          cellWidth:55
         }
-      );
 
-      doc.setFontSize(10);
+      },
+
+      didParseCell(data){
+
+        if(
+          data.section ===
+          "body" &&
+          data.column.index === 5
+        ){
+
+          data.cell.styles.fillColor =
+            [
+              222,
+              246,
+              230
+            ];
+
+          data.cell.styles.textColor =
+            [
+              25,
+              135,
+              84
+            ];
+
+          data.cell.styles.fontStyle =
+            "bold";
+
+        }
+
+        if(
+          data.section ===
+          "body" &&
+          data.column.index === 6 &&
+          Number(
+            data.cell.raw
+          ) > 0
+        ){
+
+          data.cell.styles.fillColor =
+            [
+              255,
+              232,
+              232
+            ];
+
+          data.cell.styles.textColor =
+            [
+              192,
+              57,
+              43
+            ];
+
+        }
+
+      }
+
+    });
+
+    /* =====================================
+       أرقام الصفحات
+    ===================================== */
+
+    const pageCount =
+      doc.getNumberOfPages();
+
+    for(
+      let page = 1;
+      page <= pageCount;
+      page++
+    ){
+
+      doc.setPage(page);
 
       doc.setFont(
         "helvetica",
         "normal"
       );
 
-      const accuracy =
-        card.student.totalAnswers > 0
-        ? (
-            card.student.correctAnswers /
-            card.student.totalAnswers *
-            100
-          ).toFixed(1)
-        : "0.0";
-
-      doc.text(
-        card.student.correctAnswers +
-        " Correct Answers",
-        card.x + 105,
-        202,
-        {
-          align: "center"
-        }
-      );
-
-      doc.text(
-        accuracy +
-        "% Accuracy",
-        card.x + 105,
-        216,
-        {
-          align: "center"
-        }
-      );
-
-    }else{
-
-      doc.setFontSize(11);
-
-      doc.text(
-        "No Student",
-        card.x + 105,
-        190,
-        {
-          align: "center"
-        }
-      );
-
-    }
-
-  });
-
-  /* =====================================
-     ملخص ترتيب الطلاب
-  ===================================== */
-
-  const summaryBody =
-    ranking.map(
-      (student,index) => {
-
-        const accuracy =
-          student.totalAnswers > 0
-          ? (
-              student.correctAnswers /
-              student.totalAnswers *
-              100
-            ).toFixed(1) + "%"
-          : "0%";
-
-        let rank = index + 1;
-
-        if(index === 0){
-          rank = "1 - Cup";
-        }else if(index === 1){
-          rank = "2 - Silver";
-        }else if(index === 2){
-          rank = "3 - Bronze";
-        }
-
-        return [
-
-          rank,
-
-          cleanTextForPDF(
-            student.studentName
-          ),
-
-          cleanTextForPDF(
-            student.studentIqama
-          ),
-
-          cleanTextForPDF(
-            student.course
-          ),
-
-          cleanTextForPDF(
-            student.trainer
-          ),
-
-          student.participations,
-
-          student.totalAnswers,
-
-          student.correctAnswers,
-
-          accuracy
-
-        ];
-
-      }
-    );
-
-  doc.autoTable({
-
-    startY: 245,
-
-    head: [[
-      "Rank",
-      "Student",
-      "Student ID",
-      "Course",
-      "Trainer",
-      "Participations",
-      "Total Answers",
-      "Correct Answers",
-      "Accuracy"
-    ]],
-
-    body: summaryBody,
-
-    styles: {
-
-      fontSize: 8,
-
-      cellPadding: 4,
-
-      halign: "center",
-
-      valign: "middle",
-
-      lineWidth: 0.5,
-
-      lineColor: BRAND,
-
-      textColor: BRAND
-
-    },
-
-    headStyles: {
-
-      fillColor: BRAND,
-
-      textColor: 255,
-
-      fontStyle: "bold"
-
-    },
-
-    alternateRowStyles: {
-
-      fillColor: [
-        245,
-        249,
-        255
-      ]
-
-    },
-
-    didParseCell(data){
-
-      if(
-        data.section === "body" &&
-        data.row.index === 0
-      ){
-
-        data.cell.styles.fillColor =
-          [255,244,191];
-
-        data.cell.styles.fontStyle =
-          "bold";
-
-      }
-
-      if(
-        data.section === "body" &&
-        data.row.index === 1
-      ){
-
-        data.cell.styles.fillColor =
-          [237,242,247];
-
-      }
-
-      if(
-        data.section === "body" &&
-        data.row.index === 2
-      ){
-
-        data.cell.styles.fillColor =
-          [249,225,202];
-
-      }
-
-    }
-
-  });
-
-  /* =====================================
-     صفحة جديدة لتفاصيل كل نشاط وإجابة
-  ===================================== */
-
-  doc.addPage(
-    "a4",
-    "landscape"
-  );
-
-  doc.setFillColor(...BRAND);
-
-  doc.rect(
-    0,
-    0,
-    W,
-    65,
-    "F"
-  );
-
-  doc.setTextColor(255);
-
-  doc.setFont(
-    "helvetica",
-    "bold"
-  );
-
-  doc.setFontSize(17);
-
-  doc.text(
-    "Detailed Student Answers",
-    34,
-    40
-  );
-
-  const detailsBody = [];
-
-  ranking.forEach(
-    (student,studentIndex) => {
-
-      student.activities.forEach(
-        (activity,activityIndex) => {
-
-          const accuracy =
-            activity.totalAnswers > 0
-            ? (
-                activity.correctAnswers /
-                activity.totalAnswers *
-                100
-              ).toFixed(1) + "%"
-            : "0%";
-
-          detailsBody.push([
-
-            activityIndex === 0
-            ? studentIndex + 1
-            : "",
-
-            activityIndex === 0
-            ? cleanTextForPDF(
-                student.studentName
-              )
-            : "",
-
-            activityIndex === 0
-            ? cleanTextForPDF(
-                student.studentIqama
-              )
-            : "",
-
-            cleanTextForPDF(
-              activity.activityName
-            ),
-
-            activity.totalAnswers,
-
-            activity.correctAnswers,
-
-            activity.totalAnswers -
-            activity.correctAnswers,
-
-            accuracy,
-
-            cleanTextForPDF(
-              activity.date
-            ),
-
-            activityIndex === 0
-            ? cleanTextForPDF(
-                student.course
-              )
-            : "",
-
-            activityIndex === 0
-            ? cleanTextForPDF(
-                student.trainer
-              )
-            : ""
-
-          ]);
-
-        }
-      );
-
-    }
-  );
-
-  doc.autoTable({
-
-    startY: 82,
-
-    head: [[
-      "#",
-      "Student",
-      "Student ID",
-      "Activity",
-      "Total",
-      "Correct",
-      "Incorrect",
-      "Accuracy",
-      "Date",
-      "Course",
-      "Trainer"
-    ]],
-
-    body: detailsBody,
-
-    styles: {
-
-      fontSize: 7.5,
-
-      cellPadding: 4,
-
-      halign: "center",
-
-      valign: "middle",
-
-      lineWidth: 0.5,
-
-      lineColor: BRAND,
-
-      textColor: BRAND
-
-    },
-
-    headStyles: {
-
-      fillColor: BRAND,
-
-      textColor: 255,
-
-      fontStyle: "bold"
-
-    },
-
-    alternateRowStyles: {
-
-      fillColor: [
-        245,
-        249,
-        255
-      ]
-
-    },
-
-    columnStyles: {
-
-      0: {
-        cellWidth: 25
-      },
-
-      1: {
-        cellWidth: 85
-      },
-
-      2: {
-        cellWidth: 70
-      },
-
-      3: {
-        cellWidth: 105
-      },
-
-      4: {
-        cellWidth: 42
-      },
-
-      5: {
-        cellWidth: 45
-      },
-
-      6: {
-        cellWidth: 45
-      },
-
-      7: {
-        cellWidth: 50
-      },
-
-      8: {
-        cellWidth: 65
-      },
-
-      9: {
-        cellWidth: 85
-      },
-
-      10: {
-        cellWidth: 75
-      }
-
-    },
-
-    didParseCell(data){
-
-      if(
-        data.section === "body" &&
-        data.column.index === 5
-      ){
-
-        data.cell.styles.fillColor =
-          [223,247,232];
-
-        data.cell.styles.textColor =
-          [25,135,84];
-
-        data.cell.styles.fontStyle =
-          "bold";
-
-      }
-
-      if(
-        data.section === "body" &&
-        data.column.index === 6 &&
-        Number(data.cell.raw) > 0
-      ){
-
-        data.cell.styles.fillColor =
-          [255,235,235];
-
-        data.cell.styles.textColor =
-          [192,57,43];
-
-      }
-
-    },
-
-    didDrawPage(){
-
       doc.setFontSize(8);
 
-      doc.setTextColor(120);
+      doc.setTextColor(110);
 
       doc.text(
-        "Prudle Education - Student Activity Report",
-        W / 2,
-        H - 16,
+        "Prudle Education",
+        26,
+        H - 14
+      );
+
+      doc.text(
+        "Page " +
+        page +
+        " of " +
+        pageCount,
+        W - 26,
+        H - 14,
         {
-          align: "center"
+          align:"right"
         }
       );
 
     }
 
-  });
+    doc.save(
+      "Student_Activity_Answers_Report.pdf"
+    );
 
-  doc.save(
-    "Student_Activity_Answers_Report.pdf"
-  );
+  }catch(error){
+
+    console.error(
+      "PDF export error:",
+      error
+    );
+
+    alert(
+      "PDF export failed: " +
+      (
+        error?.message ||
+        error
+      )
+    );
+
+  }
 
 }
 </script>
